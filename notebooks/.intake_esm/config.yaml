@@ -1,0 +1,4 @@
+
+default_chunk_size: 128MiB
+data_cache_directory: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data
+database_directory: /glade/p/cgd/oce/projects/cesm2-marbl/collections

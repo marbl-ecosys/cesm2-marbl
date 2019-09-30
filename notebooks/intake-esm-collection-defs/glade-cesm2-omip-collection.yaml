@@ -1,0 +1,51 @@
+name: CESM2-OMIP
+collection_type: cesm
+data_sources:
+  omip1-5cycle:
+    locations:
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/collections/cdg/timeseries-cmip6
+        exclude_dirs: ['*.nc_temp_.nc']
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v7
+      case_members:
+        - case: g.e21.GOMIPECOIAF.T62_g17.CMIP6-omip1.001
+          ctrl_experiment: None
+          ctrl_branch_year: 1
+          year_offset: 1699
+  omip1-6cycle:
+    locations:
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/collections/cdg/timeseries-cmip6
+        exclude_dirs: ['*.nc_temp_.nc']
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v7
+      case_members:
+        - case: g.e21.GOMIPECOIAF.T62_g17.CMIP6-omip1.002
+          ctrl_experiment: None
+          ctrl_branch_year: 1
+          year_offset: 1637
+  omip2:
+    locations:
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/collections/cdg/timeseries-cmip6
+        exclude_dirs: ['*.nc_temp_.nc']
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v7
+      case_members:
+        - case: g.e21.GOMIPECOIAF_JRA.TL319_g17.CMIP6-omip2.001
+          ctrl_experiment: None
+          ctrl_branch_year: 1
+          year_offset: 1652

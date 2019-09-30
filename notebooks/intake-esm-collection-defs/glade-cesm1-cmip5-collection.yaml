@@ -1,0 +1,107 @@
+name: CESM1-CMIP5
+collection_type: cesm
+data_sources:
+  piControl:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.prescribed_carb.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.prescribed_carb.001
+          ctrl_experiment: None
+          ctrl_branch_year: 1
+
+  1pctCO2:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbdrd.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.1850_ramp.1deg.ncbdrd.001
+          ctrl_experiment: piControl
+          ctrl_branch_year: 151
+
+  1pctCO2-bgc:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbdrc.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.1850_ramp.1deg.ncbdrc.001
+          ctrl_experiment: piControl
+          ctrl_branch_year: 151
+
+  1pctCO2-rad:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbcrd.002
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.1850_ramp.1deg.ncbcrd.002
+          ctrl_experiment: piControl
+          ctrl_branch_year: 151
+
+  historical:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.20th.1deg.bdrd.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.20th.1deg.bdrd.001
+          ctrl_experiment: piControl
+          ctrl_branch_year: 151
+
+  esm-piControl:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.coup_carb.004
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.coup_carb.004
+          ctrl_experiment: None
+          ctrl_branch_year: 1
+
+  esm-hist:
+    locations:
+      - name: HPSS
+        loc_type: hsi
+        direct_access: False
+        urlpath: /CCSM/csm/b40.20th.1deg.coup.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.20th.1deg.coup.001
+          ctrl_experiment: esm-piControl
+          ctrl_branch_year: 351
