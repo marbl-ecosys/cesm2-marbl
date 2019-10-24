@@ -6,7 +6,7 @@ dependencies:
 - bottleneck
 - cartopy
 - cf_units
-- cftime
+- cftime=1.0.3.4
 - cmocean
 - dask
 - distributed
