@@ -12,10 +12,8 @@ dependencies:
 - distributed
 - dask-jobqueue
 - dask-mpi
-- esmlab
 - esmpy
 - intake
-- intake-esm
 - ipywidgets
 - jupyter_contrib_nbextensions
 - jupyterlab
@@ -44,4 +42,6 @@ dependencies:
 - zarr
 - pip:
   - git+https://github.com/NCAR/pop-tools.git
+  - git+https://github.com/NCAR/intake-esm.git
+  - git+https://github.com/NCAR/esmlab.git
   - ncar-jobqueue
