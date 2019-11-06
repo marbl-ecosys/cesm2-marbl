@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Scipt by klindsay, this is adaptation of
+# https://github.com/klindsay28/CESM2_coup_carb_cycle_JAMES/blob/master/get_atm_cmip5_files.sh
 for case in b40.prescribed_carb.001 \
             b40.1850_ramp.1deg.ncbdrd.001 \
             b40.1850_ramp.1deg.ncbdrc.001 \
@@ -13,7 +15,6 @@ for case in b40.prescribed_carb.001 \
    pwd
    hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; ls *IRON_FLUX*"
    hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; cget *IRON_FLUX*"
-   # hsi "cd /CCSM/csm/$case/atm/proc/tseries/monthly ; cget *CO2* *SFCO2* *TMCO2* *TS.*"
 
 done
 
