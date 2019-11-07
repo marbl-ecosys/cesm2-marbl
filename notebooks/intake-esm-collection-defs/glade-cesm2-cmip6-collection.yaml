@@ -6,7 +6,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -22,7 +22,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -38,7 +38,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -54,7 +54,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -70,7 +70,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -138,7 +138,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -161,7 +161,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -177,7 +177,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -200,29 +200,12 @@ data_sources:
           ctrl_experiment: piControl-waccm
           ctrl_branch_year: 70
 
-  piControl-2deg:
-    locations:
-      - name: glade
-        loc_type: posix
-        direct_access: True
-        urlpath: /glade/scratch/klindsay/b.e20.B1850.f19_g17.release_cesm2_1_0.020.tmp
-        exclude_dirs: ['*.nc_temp_.nc', '*/hist/*', '*/rest/*', '*/h0gm', '*/h0gam', '*/tmpdir', '*/h0zm']
-    extra_attributes:
-      component_attrs:
-        ocn:
-          grid: POP_gx1v7
-      case_members:
-        - case: b.e20.B1850.f19_g17.release_cesm2_1_0.020
-          ctrl_experiment: None
-          ctrl_branch_year: 1
-          root_dir:
-
   esm-piControl:
     locations:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
@@ -238,7 +221,7 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/collections/cdg/timeseries-cmip6
+        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
