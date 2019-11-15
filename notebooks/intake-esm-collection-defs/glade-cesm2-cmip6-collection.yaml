@@ -14,8 +14,6 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.B1850.f09_g17.CMIP6-piControl.001
-          ctrl_member_id: None
-          ctrl_experiment: None
           ctrl_branch_year: 1
 
   abrupt-4xCO2:
@@ -161,14 +159,10 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.001
-          member_id: 1
-          sequence_order: 1
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
         - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.002
-          member_id: 2
-          sequence_order: 1
           ctrl_member_id: 1
           ctrl_experiment: historical
           ctrl_branch_year: 2015
@@ -186,20 +180,14 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.001
-          member_id: 1
-          sequence_order: 1
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
         - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.002
-          member_id: 2
-          sequence_order: 1
           ctrl_member_id: 11
           ctrl_experiment: historical
           ctrl_branch_year: 2015
         - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.003
-          member_id: 3
-          sequence_order: 1
           ctrl_member_id: 1
           ctrl_experiment: historical
           ctrl_branch_year: 2015
@@ -217,14 +205,10 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.001
-          member_id: 1
-          sequence_order: 1
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
         - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.002
-          member_id: 2
-          sequence_order: 1
           ctrl_member_id: 11
           ctrl_experiment: historical
           ctrl_branch_year: 2015
@@ -242,14 +226,10 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.001
-          member_id: 1
-          sequence_order: 1
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
         - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.002
-          member_id: 2
-          sequence_order: 1
           ctrl_member_id: 11
           ctrl_experiment: historical
           ctrl_branch_year: 2015
@@ -267,9 +247,6 @@ data_sources:
           grid: POP_gx1v7
       case_members:
         - case: b.e21.BW1850.f09_g17.CMIP6-piControl.001
-          ctrl_member_id: None
-          ctrl_experiment: None
-          ctrl_branch_year: 1
 
   historical-waccm:
     locations:
