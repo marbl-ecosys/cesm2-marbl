@@ -3,10 +3,10 @@ collection_type: cesm
 data_sources:
   piControl:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.prescribed_carb.001
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.prescribed_carb.001
     extra_attributes:
       component_attrs:
         ocn:
@@ -18,10 +18,10 @@ data_sources:
 
   1pctCO2:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbdrd.001
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.1850_ramp.1deg.ncbdrd.001
     extra_attributes:
       component_attrs:
         ocn:
@@ -33,10 +33,10 @@ data_sources:
 
   1pctCO2-bgc:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbdrc.001
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.1850_ramp.1deg.ncbdrc.001
     extra_attributes:
       component_attrs:
         ocn:
@@ -48,10 +48,10 @@ data_sources:
 
   1pctCO2-rad:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.1850_ramp.1deg.ncbcrd.002
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.1850_ramp.1deg.ncbcrd.002
     extra_attributes:
       component_attrs:
         ocn:
@@ -63,10 +63,10 @@ data_sources:
 
   historical:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.20th.1deg.bdrd.001
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.20th.1deg.bdrd.001
     extra_attributes:
       component_attrs:
         ocn:
@@ -78,10 +78,10 @@ data_sources:
 
   esm-piControl:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.coup_carb.004
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.coup_carb.004
     extra_attributes:
       component_attrs:
         ocn:
@@ -93,10 +93,10 @@ data_sources:
 
   esm-hist:
     locations:
-      - name: HPSS
-        loc_type: hsi
-        direct_access: False
-        urlpath: /CCSM/csm/b40.20th.1deg.coup.001
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.20th.1deg.coup.001
     extra_attributes:
       component_attrs:
         ocn:
