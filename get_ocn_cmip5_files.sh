@@ -23,8 +23,8 @@ for case in b40.20th.1deg.bdrd.001 ; do
    echo $case
    cd /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/$case/ocn/proc/tseries/monthly
    pwd
-   hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; ls *${VAR_NAME}*"
-   hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; cget *${VAR_NAME}*"
+   hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; ls *.${VAR_NAME}.*"
+   hsi "cd /CCSM/csm/$case/ocn/proc/tseries/monthly ; cget *.${VAR_NAME}.*"
 
 done
 
