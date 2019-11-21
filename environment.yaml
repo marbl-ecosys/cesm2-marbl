@@ -23,6 +23,7 @@ dependencies:
 - numba
 - numpy
 - pandas
+- pint
 - pip
 - pytest
 - python=3.7
