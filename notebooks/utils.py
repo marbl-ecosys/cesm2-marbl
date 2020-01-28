@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import xarray as xr
 
-def zonal_mean_via_fortran(ds, var, grid=None, three_ocean_regions=False):
+def zonal_mean_via_fortran(ds, var, grid=None, rmask_file=None):
     """
     Write ds to a temporary netCDF file, compute zonal mean for
     a given variable based on Keith L's fortran program, read
@@ -49,18 +49,8 @@ def zonal_mean_via_fortran(ds, var, grid=None, three_ocean_regions=False):
     else:
         # Assume xarray dataset contains all needed fields
         grid_file = ds_in_file.name
-    if three_ocean_regions:
-        rm_file = os.path.join(os.path.sep,
-                               'glade',
-                               'p',
-                               'cgd',
-                               'oce',
-                               'people',
-                               'klindsay',
-                               'oldcgdoce',
-                               'REGION_MASK',
-                               'new_REGION_MASK_gx1v6.nc')
-        region_mask = ['-rmask_file', rm_file]
+    if rmask_file:
+        region_mask = ['-rmask_file', rmask_file]
     else:
         region_mask = []
 
