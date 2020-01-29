@@ -109,6 +109,3 @@ docs/_build
 .vscode/
 notes/
 dask-worker.*
-
-# xpersist
-notebooks/xpersist_cache
