@@ -105,3 +105,33 @@ data_sources:
         - case: b40.20th.1deg.coup.001
           ctrl_experiment: esm-piControl
           ctrl_branch_year: 351
+
+  RCP-8.5:
+    locations:
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.rcp8_5.1deg.bdrd.001
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.rcp8_5.1deg.bdrd.001
+          ctrl_experiment: historical
+          ctrl_branch_year: 2005
+
+  esm-RCP-8.5:
+    locations:
+      - name: glade
+        loc_type: posix
+        direct_access: True
+        urlpath: /glade/p/cgd/oce/projects/cesm2-marbl/intake-esm-data/b40.rcp8_5.1deg.bprp.002
+    extra_attributes:
+      component_attrs:
+        ocn:
+          grid: POP_gx1v6
+      case_members:
+        - case: b40.rcp8_5.1deg.bprp.002
+          ctrl_experiment: esm-hist
+          ctrl_branch_year: 2005

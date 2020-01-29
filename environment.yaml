@@ -45,4 +45,5 @@ dependencies:
   - git+https://github.com/NCAR/pop-tools.git
   - git+https://github.com/NCAR/intake-esm.git
   - git+https://github.com/NCAR/esmlab.git
+  - git+https://github.com/matt-long/xpersist.git
   - ncar-jobqueue
