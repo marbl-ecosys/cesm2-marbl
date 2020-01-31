@@ -79,11 +79,11 @@ def global_vars():
 
     # Should the annual averages include the marginal seas or just be open ocean?
     # (USE TRUE FOR PAPER)
-    include_marg_seas = True
-    # include_marg_seas = False
+    all_vars['include_marg_seas'] = True
+    # all_vars['include_marg_seas'] = False
 
     # Subdirectory in xpersist cache containing netCDF files
-    all_vars['xp_dir'] = 'with_marginal_seas' if include_marg_seas else 'no_marginal_seas'
+    all_vars['xp_dir'] = 'with_marginal_seas' if all_vars['include_marg_seas'] else 'no_marginal_seas'
 
     # Process for updating intake-esm catalog
     #       1. download all data from HPSS via get_ocn_cmip5_files.sh
