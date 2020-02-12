@@ -30,7 +30,7 @@ def read_obs(src, variable=None):
     if src == 'SeaWiFS':
         root_dir=os.path.join(os.path.sep, 'glade', 'p', 'cgd', 'oce', 'projects',
                               'cesm2-marbl', 'seaWIFS-data')
-        filename='seaWIFS.chl_gsm.mon_climo.Sep1997_Dec2010.nc'
+        filename='seaWIFS.chl_gsm.ann_climo.Sep1997_Dec2010.nc'
 
     # Read in dataset, use first time dim from WOA
     ds=xr.open_dataset(os.path.join(root_dir, filename), **xr_kwargs)
@@ -40,7 +40,7 @@ def read_obs(src, variable=None):
 
 ##################################################
 
-def plot_surface_vals(variable, ds, da, obs):
+def plot_surface_vals(variable, ds, da, da_obs, obs_src='obs', levels=None, bias_levels=None, force_units=None):
     import matplotlib.pyplot as plt
     from matplotlib.colors import BoundaryNorm
     from matplotlib.ticker import MaxNLocator
@@ -48,30 +48,56 @@ def plot_surface_vals(variable, ds, da, obs):
     import cartopy
     import cartopy.crs as ccrs
 
-    TLONG = ds[variable].TLONG
-    TLAT = ds[variable].TLAT
-    computed = da[variable]
-    observed = obs[variable]
-    bias=computed-observed # convert to /vol rather than /mass
+    if type(ds) == dict:
+        ds = ds[variable]
+    if type(da) == dict:
+        da = da[variable]
+    if type(da_obs) == dict:
+        da_obs = da_obs[variable]
+    TLONG = ds.TLONG
+    TLAT = ds.TLAT
+    computed = da
+    observed = da_obs
+    bias=computed-observed
+    # If user provided specified units, assume these are pint objects
+    # Otherwise treat them as dataarrays
+    if force_units:
+        computed = computed.to(force_units).magnitude
+        observed = observed.to(force_units).magnitude
+        bias = bias.to(force_units).magnitude
+    else:
+        computed = computed.data
+        observed = observed.data
+        bias = bias.data
 
     # Determine contours
-    min_lev = 0
-    if variable == 'NO3':
-        max_lev = 42
-    if variable == 'PO4':
-        max_lev = 3.2
-    if variable == 'SiO3':
-        max_lev = 180
-    levels = MaxNLocator(nbins=15).tick_values(min_lev, max_lev)
+    if levels is None:
+#         pass
+# #         levels = MaxNLocator(nbins=len(levels)-1).tick_values(levels)
+#     else:
+        min_lev = 0
+        if variable == 'NO3':
+            max_lev = 42
+        if variable == 'PO4':
+            max_lev = 3.2
+        if variable == 'SiO3':
+            max_lev = 180
+        if variable == 'totChl':
+            max_lev = 20
+        levels = MaxNLocator(nbins=15).tick_values(min_lev, max_lev)
     cmap = plt.get_cmap('rainbow')
     norm = BoundaryNorm(levels, ncolors=cmap.N)
+    bias_kwargs=dict()
+    if bias_levels is not None:
+        bias_kwargs['norm'] = BoundaryNorm(bias_levels, ncolors=cmap.N)
+
 
     fig = plt.figure(figsize=(8, 14))
     ax = plt.subplot(3, 1, 1, projection=ccrs.Robinson(central_longitude=305.0))
 
     pc = ax.pcolormesh(TLONG,
                        TLAT,
-                       computed.to('mmol/m^3').magnitude,
+                       computed,
                        cmap=cmap,
                        transform=ccrs.PlateCarree(),
                        norm=norm)
@@ -83,13 +109,16 @@ def plot_surface_vals(variable, ds, da, obs):
     ax.coastlines(linewidth=0.5)
     cb = plt.colorbar(pc, shrink=0.6)
     ax.set_title(f'{variable} from POP run');
-    cb.set_label('$\mathrm{mmol/m^3}$')
+    if force_units:
+        cb.set_label(force_units)
+    else:
+        cb.set_label(da.attrs['units'])
 
     ax = plt.subplot(3, 1, 2, projection=ccrs.Robinson(central_longitude=305.0))
 
     pc = ax.pcolormesh(TLONG,
                        TLAT,
-                       observed.to('mmol/m^3').magnitude,
+                       observed,
                        cmap=cmap,
                        transform=ccrs.PlateCarree(),
                        norm=norm)
@@ -100,16 +129,20 @@ def plot_surface_vals(variable, ds, da, obs):
     ax.set_global()
     ax.coastlines(linewidth=0.5)
     cb = plt.colorbar(pc, shrink=0.6)
-    ax.set_title(f'{variable} from WOA');
-    cb.set_label('$\mathrm{mmol/m^3}$')
+    ax.set_title(f'{variable} from {obs_src}');
+    if force_units:
+        cb.set_label(force_units)
+    else:
+        cb.set_label(da_obs.attrs['units'])
+
 
     ax = plt.subplot(3, 1, 3, projection=ccrs.Robinson(central_longitude=305.0))
 
     pc = ax.pcolormesh(TLONG,
                        TLAT,
-                       bias.to('mmol/m^3').magnitude,
+                       bias,
                        cmap=plt.get_cmap('bwr'),
-                       transform=ccrs.PlateCarree())
+                       transform=ccrs.PlateCarree(), **bias_kwargs)
 
     # ax.add_feature(cartopy.feature.NaturalEarthFeature('physical','land','110m',
     #                                                    edgecolor='face',
@@ -118,7 +151,11 @@ def plot_surface_vals(variable, ds, da, obs):
     ax.coastlines(linewidth=0.5)
     cb = plt.colorbar(pc, shrink=0.6)
     ax.set_title(f'Bias in {variable}');
-    cb.set_label('$\mathrm{mmol/m^3}$')
+    if force_units:
+        cb.set_label(force_units)
+    else:
+        cb.set_label(da.attrs['units'])
+
 
 ##################################################
 
