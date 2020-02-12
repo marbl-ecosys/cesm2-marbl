@@ -1,12 +1,36 @@
-Jan: S19980012010031.L3m_MC_GSM_chl_gsm_9km.nc
-Feb: S19980322010059.L3m_MC_GSM_chl_gsm_9km.nc
-Mar: S19980602010090.L3m_MC_GSM_chl_gsm_9km.nc
-Apr: S19980912010120.L3m_MC_GSM_chl_gsm_9km.nc
-May: S19981212010151.L3m_MC_GSM_chl_gsm_9km.nc
-Jun: S19981522010181.L3m_MC_GSM_chl_gsm_9km.nc
-Jul: S19981822010212.L3m_MC_GSM_chl_gsm_9km.nc
-Aug: S19982132010243.L3m_MC_GSM_chl_gsm_9km.nc
-Sep: S19972442010273.L3m_MC_GSM_chl_gsm_9km.nc
-Oct: S19972742010304.L3m_MC_GSM_chl_gsm_9km.nc
-Nov: S19973052010334.L3m_MC_GSM_chl_gsm_9km.nc
-Dec: S19973352010365.L3m_MC_GSM_chl_gsm_9km.nc
+Jan:
+    file: S19980012010031.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Feb:
+    file: S19980322010059.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 28
+Mar:
+    file: S19980602010090.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Apr:
+    file: S19980912010120.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 30
+May:
+    file: S19981212010151.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Jun:
+    file: S19981522010181.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 30
+Jul:
+    file: S19981822010212.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Aug:
+    file: S19982132010243.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Sep:
+    file: S19972442010273.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 30
+Oct:
+    file: S19972742010304.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
+Nov:
+    file: S19973052010334.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 30
+Dec:
+    file: S19973352010365.L3m_MC_GSM_chl_gsm_9km.nc
+    len: 31
