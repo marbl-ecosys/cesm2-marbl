@@ -1,23 +1,32 @@
-def read_CESM_var(dq, time_slice, variable):
+def read_CESM_var(dq, time_slice, variable, mean_dims=None):
     # Define datasets
+    mean_kwargs = dict()
+    if mean_dims:
+        mean_kwargs['dim'] = mean_dims
     dataset = dq['ocn.historical.pop.h']
 
     keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 'TLAT', 'time', 'time_bound', 'member_id', 'ctrl_member_id'] + [variable]
-    dataset = dataset.drop([v for v in dataset.variables if v not in keep_vars]).sel(time=time_slice).mean(dim=['member_id', 'time']).compute()
+    dataset = dataset.drop([v for v in dataset.variables if v not in keep_vars]).sel(time=time_slice).mean(**mean_kwargs).compute()
 
     return(dataset)
 
 ##################################################
 
-def read_obs(src, variable=None):
+def read_obs(src, variable=None, freq='monthly'):
     import os
     import xarray as xr
 
     if src not in ['WOA', 'SeaWiFS']:
         raise ValueError(f'{src} is not a valid source')
 
+    if freq in ['month', 'monthly']:
+        freq = 'mon'
+    if freq == 'annual':
+        freq = 'ann'
     xr_kwargs = dict()
     if src == 'WOA':
+        if freq not in ['mon']:
+            raise ValueError(f'{freq} is not a valid frequency of data for {src}')
         # varmap is used to define the filename
         varmap = {'NO3' : 'n', 'PO4' : 'p', 'SiO3' : 'i'}
         if variable not in varmap:
@@ -28,9 +37,11 @@ def read_obs(src, variable=None):
         xr_kwargs['decode_times'] = False
 
     if src == 'SeaWiFS':
+        if freq not in ['mon', 'ann']:
+            raise ValueError(f'{freq} is not a valid frequency of data for {src}')
         root_dir=os.path.join(os.path.sep, 'glade', 'p', 'cgd', 'oce', 'projects',
                               'cesm2-marbl', 'seaWIFS-data')
-        filename='seaWIFS.chl_gsm.ann_climo.Sep1997_Dec2010.nc'
+        filename=f'seaWIFS.chl_gsm.{freq}_climo.Sep1997_Dec2010.nc'
 
     # Read in dataset, use first time dim from WOA
     ds=xr.open_dataset(os.path.join(root_dir, filename), **xr_kwargs)
