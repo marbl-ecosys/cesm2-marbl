@@ -1,11 +1,19 @@
-def read_CESM_var(dq, time_slice, variable, mean_dims=None):
-    # Define datasets
+def read_CESM_var(time_slice, variable, mean_dims=None):
+    import intake
+    import intake_esm
+
+    # Define catalog
+    catalog = intake.open_esm_datastore('/glade/collections/cmip/catalog/intake-esm-datastore/catalogs/campaign-cesm2-cmip6-timeseries.json')
+    dq = catalog.search(experiment='historical', component='ocn', variable=variable).to_dataset_dict(cdf_kwargs={'chunks':{'time': 4}})
+
     mean_kwargs = dict()
     if mean_dims:
         mean_kwargs['dim'] = mean_dims
+
+    # Define datasets
     dataset = dq['ocn.historical.pop.h']
 
-    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 'TLAT', 'time', 'time_bound', 'member_id', 'ctrl_member_id'] + [variable]
+    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 'TLAT', 'time', 'time_bound', 'member_id', 'ctrl_member_id', variable]
     dataset = dataset.drop([v for v in dataset.variables if v not in keep_vars]).sel(time=time_slice).mean(**mean_kwargs).compute()
 
     return(dataset)
