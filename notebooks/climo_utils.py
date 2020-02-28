@@ -45,7 +45,7 @@ def read_obs(src, variable=None, freq='monthly'):
         xr_kwargs['decode_times'] = False
 
     if src == 'SeaWiFS':
-        if freq not in ['mon', 'ann']:
+        if freq not in ['mon', 'ann', 'JJA', 'DJF']:
             raise ValueError(f'{freq} is not a valid frequency of data for {src}')
         root_dir=os.path.join(os.path.sep, 'glade', 'p', 'cgd', 'oce', 'projects',
                               'cesm2-marbl', 'seaWIFS-data')
