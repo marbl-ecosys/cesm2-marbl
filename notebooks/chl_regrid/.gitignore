@@ -1,0 +1,4 @@
+*.nc
+PET*.ESMF_LogFile
+scrip_grids/
+weights/

@@ -6,6 +6,7 @@ def get_pint_units():
     units.define('gram N = mol / 14 = gN')
     units.define('gram C = mol / 12 = gC')
     units.define('year = 365 day = yr')
+    units.define('micromoles_per_kilogram = umol / kg') # used in WOA datasets
 
     # Define final units
     PgC_per_year = 'PgC/yr'
@@ -31,6 +32,8 @@ def get_pint_units():
     final_units['O2_under_thres'] = 'Pm * m^2'
 
     return units, final_units
+
+##################################################
 
 def get_ann_means_and_units(xp_dir, vars, experiments, experiment_longnames, units):
     import os
@@ -64,6 +67,8 @@ def get_ann_means_and_units(xp_dir, vars, experiments, experiment_longnames, uni
 
     return ann_avg, cesm_units
 
+##################################################
+
 def print_exp_time_bounds(ann_avg_var0, time_slices):
     # Verify time bounds for each experiment
     for exp in ann_avg_var0:
@@ -72,6 +77,8 @@ def print_exp_time_bounds(ann_avg_var0, time_slices):
         except:
             bounds = list(ann_avg_var0[exp].isel(time=time_slices[exp]).time_bound.values[ind] for ind in [(0,0), (-1,-1)])
         print(f'Experiment: {exp}\nRequested time bounds\n----\n{bounds}\n\n')
+
+##################################################
 
 def global_vars():
     # all variables will be packed into a dictionary
@@ -194,6 +201,8 @@ def global_vars():
 
     return all_vars
 
+##################################################
+
 def get_table_specs(final_units, o2_levs=[]):
     table_specs = {
                   'POC' : {
@@ -285,6 +294,8 @@ def get_table_specs(final_units, o2_levs=[]):
             table_specs[f'o2_under_{o2_thres}']['units'] = final_units['O2_under_thres']
 
     return table_specs
+
+##################################################
 
 def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, cesm_units, final_units, verbose=False):
     diagnostic_values = dict()
@@ -407,6 +418,8 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
 
     return diagnostic_values
 
+##################################################
+
 def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units, final_units):
     try:
         if exp in ['cesm1_PI', 'cesm1_PI_esm', 'cesm2_PI']:
@@ -419,8 +432,10 @@ def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units,
         return('-')
     return((ens_time_mean * cesm_units[variable][exp]).to(final_units[variable]))
 
-# Define keys that will go into table columns
+##################################################
+
 def _O2_vol_keys(o2_thres):
+    # Define keys that will go into table columns
     if o2_thres == 20:
         return f'OMZ volume (O$_2$ $<$20 $\mu$M)'
     return f'Volume where O$_2$ $<${o2_thres} $\mu$M'
