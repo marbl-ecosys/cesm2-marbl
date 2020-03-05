@@ -277,3 +277,6 @@ def plot_zonal_averages_by_region(variables, region, da, obs, lat, z):
             ax.set(ylabel='', yticklabels='')
         ax.set(xlabel='Latitude')
         ax.invert_yaxis()
+
+        
+        
