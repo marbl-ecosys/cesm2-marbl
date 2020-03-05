@@ -1,8 +1,27 @@
 import os
 import subprocess
 import tempfile
+
+import matplotlib.pyplot as plt
+
 import xarray as xr
 import numpy as np
+
+
+def savefig(plot_name):
+    """Write figure"""
+
+    if 'CESM2_MARBL_FIGURE_DIR' in os.environ:
+        dirout = os.environ['CESM2_MARBL_FIGURE_DIR']
+    else:
+        dirout = 'figures'
+
+    os.makedirs(dirout, exist_ok=True)
+
+    plt.savefig(os.path.join(dirout, plot_name),
+                dpi=300,
+                bbox_inches='tight',
+                metadata={'CreationDate': None})
 
 def zonal_mean_via_fortran(ds, var, grid=None, rmask_file=None):
     """
