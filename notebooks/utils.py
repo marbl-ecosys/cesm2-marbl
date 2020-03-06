@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np
 
+import pop_tools
 
 def savefig(plot_name):
     """Write figure"""
@@ -23,7 +24,7 @@ def savefig(plot_name):
                 bbox_inches='tight',
                 metadata={'CreationDate': None})
 
-def zonal_mean_via_fortran(ds, var, grid=None, rmask_file=None):
+def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
     """
     Write ds to a temporary netCDF file, compute zonal mean for
     a given variable based on Keith L's fortran program, read
@@ -48,39 +49,29 @@ def zonal_mean_via_fortran(ds, var, grid=None, rmask_file=None):
                           'bin',
                           'zon_avg',
                           'za')
-    if grid:
-        # Point to a file that contains all necessary grid variables
-        # I think that is KMT, TLAT, TLONG, TAREA, ULAT, ULONG, UAREA, and REGION_MASK
-        if grid == 'gx1v7':
-            grid_file = os.path.join(os.path.sep,
-                                     'glade',
-                                     'collections',
-                                     'cdg',
-                                     'timeseries-cmip6',
-                                     'b.e21.B1850.f09_g17.CMIP6-piControl.001',
-                                     'ocn',
-                                     'proc',
-                                     'tseries',
-                                     'month_1',
-                                     'b.e21.B1850.f09_g17.CMIP6-piControl.001.pop.h.NO3.000101-009912.nc')
-        else:
-            print(f'WARNING: no grid file for {grid}, using xarray dataset for grid vars')
-            grid_file = ds_in_file.name
+    if grid is not None:
+        grid = pop_tools.get_grid(grid)
+        
+        grid_file = tempfile.NamedTemporaryFile(suffix='.nc')
+        grid_file_name = grid_file.name
+        del grid.attrs['region_mask_regions']
+        grid.to_netcdf(grid_file_name)
+        
     else:
         # Assume xarray dataset contains all needed fields
-        grid_file = ds_in_file.name
-    if rmask_file:
-        region_mask = ['-rmask_file', rmask_file]
+        grid_file_name = ds_in_file.name
+
+    if region_mask is not None:
+        rmask_file = tempfile.NamedTemporaryFile(suffix='.nc')
+        region_mask.to_netcdf(rmask_file.name)
+        cmd_region_mask = ['-rmask_file', rmask_file.name]
     else:
-        region_mask = []
+        cmd_region_mask = []
 
     # Set up the call to za with correct options
-    za_call = [za_exe,
-               '-v', var] + \
-              region_mask + \
-              [
-               '-grid_file', grid_file,
-               '-kmt_file', grid_file,
+    za_call = [za_exe, '-v', var] + cmd_region_mask + \
+              ['-grid_file', grid_file_name,
+               '-kmt_file', grid_file_name,
                '-O', '-o', ds_out_file.name, # -O overwrites existing file, -o gives file name
                ds_in_file.name]
 
