@@ -1,0 +1,15 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "basins",
+        "z_t",
+        "lat_t"
+    ],
+    "cell_methods": "area: mean depth: mean time: mean within years time: mean over years",
+    "grid_mapping": "crs",
+    "long_name": "NO3",
+    "src_file": "/glade/work/mlevy/woa2018/1x1d/woa18_all_n00_01.nc",
+    "src_file_varname": "n_an",
+    "standard_name": "moles_concentration_of_nitrate_in_sea_water",
+    "units": "mmol m$^{-3}$",
+    "wgtFile": "/glade/work/mlevy/regrid/weight_files/latlon_1x1_180W_to_POP_gx1v7_bilinear_20180530.nc"
+}

@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "z_t"
+    ],
+    "cell_methods": "time: mean",
+    "grid_loc": "3111",
+    "long_name": "SiO3",
+    "units": "mmol m$^{-3}$"
+}

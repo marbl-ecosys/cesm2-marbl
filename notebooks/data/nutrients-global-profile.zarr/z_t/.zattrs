@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "z_t"
+    ],
+    "long_name": "Depth",
+    "positive": "down",
+    "units": "m"
+}

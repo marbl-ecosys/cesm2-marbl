@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "lat_t"
+    ],
+    "edges": "lat_t_edges",
+    "long_name": "Latitude Cell Centers",
+    "units": "degrees_north"
+}
