@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import tempfile
 
@@ -8,6 +9,7 @@ import xarray as xr
 import numpy as np
 
 import pop_tools
+
 
 def savefig(plot_name):
     """Write figure"""
@@ -23,6 +25,21 @@ def savefig(plot_name):
                 dpi=300,
                 bbox_inches='tight',
                 metadata={'CreationDate': None})
+
+
+def write_ds_out(dso, file_out):
+    file_out = os.path.realpath(file_out)
+
+    os.makedirs(os.path.dirname(file_out), exist_ok=True)
+
+    if os.path.exists(file_out):
+        shutil.rmtree(file_out)
+    print('-'*30)
+    print(f'Writing {file_out}')
+    dso.info()
+    print()
+    dso.to_zarr(file_out);
+
 
 def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
     """
