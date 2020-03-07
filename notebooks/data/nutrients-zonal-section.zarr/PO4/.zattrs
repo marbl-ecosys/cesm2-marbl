@@ -5,6 +5,7 @@
         "lat_t"
     ],
     "cell_methods": "time: mean",
+    "coordinates": "z_t_",
     "grid_loc": "3111",
     "long_name": "Dissolved Inorganic Phosphate",
     "units": "mmol m$^{-3}$"

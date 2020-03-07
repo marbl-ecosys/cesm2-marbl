@@ -5,6 +5,7 @@
         "lat_t"
     ],
     "cell_methods": "area: mean depth: mean time: mean within years time: mean over years",
+    "coordinates": "z_t_",
     "grid_mapping": "crs",
     "long_name": "PO4",
     "src_file": "/glade/work/mlevy/woa2018/1x1d/woa18_all_p00_01.nc",
