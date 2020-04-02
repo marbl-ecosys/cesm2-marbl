@@ -3,7 +3,7 @@ def read_CESM_var(time_slice, variable, mean_dims=None):
     import intake_esm
 
     # Define catalog
-    catalog = intake.open_esm_datastore('/glade/collections/cmip/catalog/intake-esm-datastore/catalogs/campaign-cesm2-cmip6-timeseries.json')
+    catalog = intake.open_esm_datastore('data/campaign-cesm2-cmip6-timeseries.json')
     dq = catalog.search(experiment='historical', component='ocn', variable=variable).to_dataset_dict(cdf_kwargs={'chunks':{'time': 4}})
 
     mean_kwargs = dict()
