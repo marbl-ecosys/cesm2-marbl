@@ -1,0 +1,15 @@
+output : latex
+columns :
+    - Value
+    - Units
+    - Description
+defaults :
+    grid : CESM_x1
+    saved_state_source : settings_file
+Parameters :
+    autotroph_settings(1)%PCref_per_day :
+        label : $\mu_{\mathrm{ref},\mathrm{sp}}$
+    autotroph_settings(2)%PCref_per_day : 
+        label : $\mu_{\mathrm{ref},\mathrm{diat}}$
+    autotroph_settings(3)%PCref_per_day : 
+        label : $\mu_{\mathrm{ref},\mathrm{diaz}}$
