@@ -3,6 +3,7 @@ channels:
 - conda-forge
 - defaults
 dependencies:
+- bokeh==1.4.0
 - bottleneck
 - cartopy
 - cf_units
@@ -14,6 +15,7 @@ dependencies:
 - dask-mpi
 - esmpy
 - intake
+- intake-esm #=2019.12.13
 - ipywidgets
 - jupyter_contrib_nbextensions
 - jupyterlab
@@ -43,8 +45,8 @@ dependencies:
 - zarr
 - pip:
   - git+https://github.com/matt-long/pop-tools.git
-  - git+https://github.com/NCAR/intake-esm.git
   - git+https://github.com/NCAR/esmlab.git
   - git+https://github.com/NCAR/esmlab-regrid.git
   - git+https://github.com/matt-long/xpersist.git
   - ncar-jobqueue
+#  - git+https://github.com/NCAR/intake-esm.git

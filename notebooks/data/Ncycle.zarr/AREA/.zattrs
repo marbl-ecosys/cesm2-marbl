@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "nlat",
+        "nlon"
+    ],
+    "coordinates": "TLONG TLAT",
+    "units": "m^2"
+}
