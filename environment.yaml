@@ -9,8 +9,8 @@ dependencies:
 - cf_units
 - cftime=1.0.3.4
 - cmocean
-- dask
-- distributed
+- dask=2.14.0
+- distributed=2.14.0
 - dask-jobqueue
 - dask-mpi
 - esmpy
