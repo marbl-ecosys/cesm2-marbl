@@ -1,0 +1,8 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "z_t_150m"
+    ],
+    "long_name": "depth from surface to midpoint of layer",
+    "positive": "down",
+    "units": "cm"
+}
