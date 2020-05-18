@@ -1,0 +1,93 @@
+latex_replacements:
+    'PgC': 'Pg C'
+    '/yr': ' yr$^{-1}$'
+    '/m2': ' m$^{-2}$'
+    'uM': '$\mu$M'
+
+pint_definitions:
+ - 'gram N = mol / 14 = gN'
+ - 'gram C = mol / 12 = gC'
+ - 'year = 365 day = yr'
+ - 'micromoles_per_kilogram = umol / kg'
+ 
+expected_units:
+  C_flux: 
+    'nmol/cm^2/s cm^2': 'PgC/yr'
+    'nmol/cm^2/s': 'mol/m^2/yr'    
+  N_flux: 
+    'nmol/cm^2/s cm^2': 'TgC/yr'
+    'nmol/cm^2/s': 'mol/m^2/yr'    
+    
+variable_groups:
+    C_flux:
+        - FG_CO2
+        - FvTOT_DIC
+        - tend_zint_100m_DIC
+        - tend_zint_100m_DOC
+        - Jint_100m_DIC
+        - Jint_100m_DOC
+        - Jint_100m_ALK
+        - photoC_TOT_zint
+        - photoC_TOT_zint_100m
+        - photoC_sp_zint_100m
+        - photoC_diat_zint_100m
+        - photoC_diaz_zint_100m
+        - photoC_sp_zint
+        - photoC_diat_zint
+        - photoC_diaz_zint
+        - POC_FLUX_100m
+        - CaCO3_FLUX_100m
+        - DIC_RIV_FLUX
+        - DOC_RIV_FLUX
+        - ALK_RIV_FLUX
+        - pocToSed
+        - calcToSed
+    N_flux:
+        - diaz_Nfix
+        - DENITRIF
+        - NOx_FLUX
+        - NHy_FLUX
+        - NO3_RIV_FLUX
+        - DON_RIV_FLUX
+        - DONr_RIV_FLUX
+        - ponToSed
+        - SedDenitrif
+    Si_flux:
+        - SiO2_100m
+        - SiO3_RIV_FLUX
+        - bsiToSed
+    diag_ave:
+        - ABIO_ALK_SURF
+        - ABIO_CO2STAR
+        - ABIO_D14Catm
+        - ABIO_D14Cocn
+        - ABIO_DCO2STAR
+        - ABIO_DpCO2
+        - ABIO_PH_SURF
+        - ABIO_pCO2
+        - ABIO_pCO2SURF
+        - pCO2SURF
+        - DpCO2
+        - PH
+        - ATM_CO2
+        - O2_ZMIN
+        - O2_ZMIN_DEPTH
+        - HMXL
+        - IFRAC
+        - SHF_TOTAL
+    tracer:
+        - ABIO_DIC
+        - ABIO_DIC14
+        - ALK
+        - DIC
+        - Fe
+        - IAGE
+        - NO3
+        - O2
+        - PO4
+        - SALT
+        - SiO3
+        - TEMP
+
+    transport:
+        - ACC
