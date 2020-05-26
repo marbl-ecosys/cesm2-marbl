@@ -140,10 +140,10 @@ def global_vars():
                                       'cesm1_RCP85_esm' : 'RCP 8.5 2090s (CESM1)',
                                       'cesm2_PI' : 'preindustrial (CESM2)',
                                       'cesm2_hist' : '1990-2014 (CESM2)',
-                                      'cesm2_SSP1-2.6' : 'RCP26 2090s (CESM2)',
-                                      'cesm2_SSP2-4.5' : 'RCP45 2090s (CESM2)',
-                                      'cesm2_SSP3-7.0' : 'RCP70 2090s (CESM2)',
-                                      'cesm2_SSP5-8.5' : 'RCP85 2090s (CESM2)'
+                                      'cesm2_SSP1-2.6' : 'SSP1-2.6 2090s (CESM2)',
+                                      'cesm2_SSP2-4.5' : 'SSP2-4.5 2090s (CESM2)',
+                                      'cesm2_SSP3-7.0' : 'SSP3-7.0 2090s (CESM2)',
+                                      'cesm2_SSP5-8.5' : 'SSP5-8.5 2090s (CESM2)'
                                      }
 
     # experiment_dict determines which module version & intake data each experiment uses
