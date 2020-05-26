@@ -383,7 +383,7 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
                                                                        )
                 try:
                     diagnostic_values[exp][table_specs['Ncycle']['key']] = (diagnostic_values[exp][table_specs['Ncycle']['key']] -
-                                                                            diagnostic_values[exp][table_specs['denitrif2']['key']] - 
+                                                                            diagnostic_values[exp][table_specs['denitrif2']['key']] + 
                                                                             diagnostic_values[exp][table_specs['rivflux']['key']]
                                                                            )
                 except:
