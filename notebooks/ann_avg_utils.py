@@ -23,6 +23,7 @@ def get_pint_units():
     final_units['diaz_Nfix'] = TgN_per_year
     final_units['NOx_FLUX'] = TgN_per_year
     final_units['NHy_FLUX'] = TgN_per_year
+    final_units['NHx_SURFACE_EMIS'] = TgN_per_year
     final_units['DENITRIF'] = TgN_per_year
     final_units['SedDenitrif'] = TgN_per_year
     final_units['DON_RIV_FLUX'] = TgN_per_year
@@ -103,8 +104,8 @@ def global_vars():
                         'photoC_TOT_zint_100m', 'photoC_diat_zint_100m',
                         'photoC_TOT_zint', 'photoC_diat_zint',
                         'POC_FLUX_100m', 'CaCO3_FLUX_100m',
-                        'diaz_Nfix', 'NOx_FLUX', 'NHy_FLUX', 'DENITRIF',
-                        'SedDenitrif', 'DON_RIV_FLUX', 'DONr_RIV_FLUX',
+                        'diaz_Nfix', 'NOx_FLUX', 'NHy_FLUX', 'NHx_SURFACE_EMIS',
+                        'DENITRIF', 'SedDenitrif', 'DON_RIV_FLUX', 'DONr_RIV_FLUX',
                         'FG_CO2', 'O2' ,
                         'O2_under_thres' # add a thres dimension corresponding to limits
                        ]
@@ -250,6 +251,11 @@ def get_table_specs(final_units, o2_levs=[]):
                             'units' : final_units['NOx_FLUX'],
                             'rounding' : 1
                            },
+                  'Nemis' : {
+                            'key' : 'Nitrogen surface emissions',
+                            'units' : final_units['NHx_SURFACE_EMIS'],
+                            'rounding' : 0
+                           },
                   'denitrif' : {
                                 'key' : 'Water Column Denitrification',
                                 'units' : final_units['DENITRIF'],
@@ -362,6 +368,10 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
                                                 _get_time_and_ensemble_mean('NHy_FLUX', **kwargs))
 
             if verbose:
+                print(f'Computing Ndep for {exp}')
+            diagnostic_values[exp][table_specs['Nemis']['key']] = _get_time_and_ensemble_mean('NHx_SURFACE_EMIS', **kwargs)
+
+            if verbose:
                 print(f'Computing Water Column Denitrif for {exp}')
             diagnostic_values[exp][table_specs['denitrif']['key']] = _get_time_and_ensemble_mean('DENITRIF', **kwargs)
 
@@ -383,7 +393,8 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
                                                                        )
                 try:
                     diagnostic_values[exp][table_specs['Ncycle']['key']] = (diagnostic_values[exp][table_specs['Ncycle']['key']] -
-                                                                            diagnostic_values[exp][table_specs['denitrif2']['key']] + 
+                                                                            diagnostic_values[exp][table_specs['denitrif2']['key']] -
+                                                                            diagnostic_values[exp][table_specs['Nemis']['key']] +
                                                                             diagnostic_values[exp][table_specs['rivflux']['key']]
                                                                            )
                 except:
