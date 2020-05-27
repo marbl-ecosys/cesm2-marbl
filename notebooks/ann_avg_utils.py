@@ -25,9 +25,11 @@ def get_pint_units():
     final_units['NHy_FLUX'] = TgN_per_year
     final_units['NHx_SURFACE_EMIS'] = TgN_per_year
     final_units['DENITRIF'] = TgN_per_year
+    final_units['ponToSed'] = TgN_per_year
     final_units['SedDenitrif'] = TgN_per_year
     final_units['DON_RIV_FLUX'] = TgN_per_year
     final_units['DONr_RIV_FLUX'] = TgN_per_year
+    final_units['NO3_RIV_FLUX'] = TgN_per_year
     final_units['FG_CO2'] = PgC_per_year
     final_units['O2'] = 'uM'
     final_units['O2_under_thres'] = 'Pm * m^2'
@@ -106,7 +108,7 @@ def global_vars():
                         'POC_FLUX_100m', 'CaCO3_FLUX_100m',
                         'diaz_Nfix', 'NOx_FLUX', 'NHy_FLUX', 'NHx_SURFACE_EMIS',
                         'DENITRIF', 'SedDenitrif', 'DON_RIV_FLUX', 'DONr_RIV_FLUX',
-                        'FG_CO2', 'O2' ,
+                        'NO3_RIV_FLUX', 'ponToSed', 'FG_CO2', 'O2' ,
                         'O2_under_thres' # add a thres dimension corresponding to limits
                        ]
 
@@ -271,10 +273,15 @@ def get_table_specs(final_units, o2_levs=[]):
                                'units' : final_units['DON_RIV_FLUX'],
                                'rounding' : 0
                               },
+                  'Nbury' : {
+                             'key' : 'Nitrogen Burial to Sediment',
+                             'units' : final_units['ponToSed'],
+                             'rounding' : 0
+                            },
                   'Ncycle' : {
                               'key' : 'N cycle imbalance',
                               'units' : final_units['diaz_Nfix'],
-                              'rounding' : 0
+                              'rounding' : 1
                              },
                   'CO2' : {
                            'key' : 'Air–sea CO2 flux',
@@ -381,8 +388,13 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
 
             if verbose:
                 print(f'Computing Nitrogen River Flux for {exp}')
+            diagnostic_values[exp][table_specs['Nbury']['key']] = _get_time_and_ensemble_mean('ponToSed', **kwargs)
+
+            if verbose:
+                print(f'Computing Nitrogen River Flux for {exp}')
             diagnostic_values[exp][table_specs['rivflux']['key']] = (_get_time_and_ensemble_mean('DON_RIV_FLUX', **kwargs) +
-                                                   _get_time_and_ensemble_mean('DONr_RIV_FLUX', **kwargs))
+                                                   _get_time_and_ensemble_mean('DONr_RIV_FLUX', **kwargs) +
+                                                   _get_time_and_ensemble_mean('NO3_RIV_FLUX', **kwargs))
 
             if verbose:
                 print(f'Computing Nitrogen Cycle imbalance for {exp}')
@@ -394,6 +406,7 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
                 try:
                     diagnostic_values[exp][table_specs['Ncycle']['key']] = (diagnostic_values[exp][table_specs['Ncycle']['key']] -
                                                                             diagnostic_values[exp][table_specs['denitrif2']['key']] -
+                                                                            diagnostic_values[exp][table_specs['Nbury']['key']] -
                                                                             diagnostic_values[exp][table_specs['Nemis']['key']] +
                                                                             diagnostic_values[exp][table_specs['rivflux']['key']]
                                                                            )
