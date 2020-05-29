@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e # abort if any command fails
+
 source /glade/work/mlevy/miniconda3/etc/profile.d/conda.sh
 
 # # Build netcdf file (CESM1-CMIP5)

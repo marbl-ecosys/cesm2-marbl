@@ -7,7 +7,7 @@ data_sources:
         loc_type: posix
         direct_access: True
         urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
-        exclude_dirs: ['*.nc_temp_.nc']
+        exclude_dirs: ['*.nc_temp_.nc', '*.120001-120012*', '*.GOOD*']
     extra_attributes:
       component_attrs:
         ocn:
