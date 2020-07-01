@@ -11,7 +11,7 @@ import xpersist as xp
 import intake
 import intake_esm
 
-from . config import path_to_here, project_tmpdir
+from . config import path_to_here, project_tmpdir, cache_database_file
 from . import units
 from . import util
 from . import pop

@@ -17,6 +17,7 @@ expected_units:
   N_flux: 
     'nmol/cm^2/s cm^2': 'TgC/yr'
     'nmol/cm^2/s': 'mol/m^2/yr'    
+    'mmol/m^3/s cm^2': 'TgC/yr'
     
 variable_groups:
     C_flux:

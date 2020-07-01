@@ -4,7 +4,7 @@ from . import util
 
 
 def get_grid(model):
-    """returnt the model grid"""
+    """return the model grid"""
     if model in ['cesm1']:
         grid = pop_tools.get_grid('POP_gx1v6')
     elif model in ['cesm2']:
