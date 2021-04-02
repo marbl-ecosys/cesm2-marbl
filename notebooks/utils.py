@@ -71,7 +71,7 @@ def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
         
         grid_file = tempfile.NamedTemporaryFile(suffix='.nc')
         grid_file_name = grid_file.name
-        del grid.attrs['region_mask_regions']
+        #del grid.attrs['region_mask_regions']
         grid.to_netcdf(grid_file_name)
         
     else:
