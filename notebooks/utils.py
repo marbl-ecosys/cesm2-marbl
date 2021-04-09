@@ -41,7 +41,7 @@ def write_ds_out(dso, file_out):
     dso.to_zarr(file_out);
 
 
-def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
+def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None):
     """
     Write ds to a temporary netCDF file, compute zonal mean for
     a given variable based on Keith L's fortran program, read
@@ -55,6 +55,9 @@ def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
     # xarray doesn't require the ".nc" suffix, but it's useful to know what the file is for
     ds_in_file = tempfile.NamedTemporaryFile(suffix='.nc')
     ds_out_file = tempfile.NamedTemporaryFile(suffix='.nc')
+    
+    ds = ds.copy()
+    ds.attrs = {} # for some reason, file attrs are 
     ds.to_netcdf(ds_in_file.name)
 
     # Set up location of the zonal average executable
@@ -78,36 +81,41 @@ def zonal_mean_via_fortran(ds, var, grid=None, region_mask=None):
         # Assume xarray dataset contains all needed fields
         grid_file_name = ds_in_file.name
 
+    # Set up the call to za with correct options
+    za_call = [za_exe]
+    if var is not None:
+        za_call += ['-v', var] 
+            
     if region_mask is not None:
         rmask_file = tempfile.NamedTemporaryFile(suffix='.nc')
         region_mask.to_netcdf(rmask_file.name)
-        cmd_region_mask = ['-rmask_file', rmask_file.name]
-    else:
-        cmd_region_mask = []
+        za_call += ['-rmask_file', rmask_file.name]
 
-    # Set up the call to za with correct options
-    za_call = [za_exe, '-v', var] + cmd_region_mask + \
-              ['-grid_file', grid_file_name,
-               '-kmt_file', grid_file_name,
-               '-O', '-o', ds_out_file.name, # -O overwrites existing file, -o gives file name
-               ds_in_file.name]
-
+    za_call += [
+        '-grid_file', grid_file_name,
+        '-kmt_file', grid_file_name,
+        '-O', '-o', ds_out_file.name, # -O overwrites existing file, -o gives file name
+        ds_in_file.name
+    ]
     # Use subprocess to call za, allows us to capture stdout and print it
     proc = subprocess.Popen(za_call, stdout=subprocess.PIPE)
     (out, err) = proc.communicate()
+       
     if not out:
         # Read in the newly-generated file
         print('za ran successfully, writing netcdf output')
         ds_out = xr.open_dataset(ds_out_file.name)
+
     else:
         print(f'za reported an error:\n{out.decode("utf-8")}')
-
+        print(za_call)
+        return 
+    
     # Delete the temporary files and return the new xarray dataset
     ds_in_file.close()
-    ds_out_file.close()
-    if not out:
-        return(ds_out)
-    return(None)
+    ds_out_file.close()        
+    return ds_out    
+
 
 def pop_add_cyclic(ds):
     
@@ -184,3 +192,66 @@ def label_plots(fig, axs, xoff=-0.04, yoff=0.02):
             fontsize=14,
             fontweight='semibold'
         ) 
+        
+        
+        
+def get_pop_region_mask_za(mask_type='3d', grid_name='POP_gx1v7',):
+    """return a region mask for zonal averaging"""
+    mask3d = pop_tools.region_mask_3d(grid_name, mask_name='Pacific-Indian-Atlantic')
+    nregion = len(mask3d.region)
+    
+    if mask_type.lower() == '3d':
+        return mask3d
+
+    elif mask_type.lower() == '2d':
+        mask2d = xr.full_like(
+            mask3d.isel(region=0), fill_value=0, dtype=np.int32
+        )
+        for i in range(1, nregion): # skip first index because "za" puts the global field in there
+            mask2d = xr.where(mask3d.isel(region=i)==1, i, mask2d)
+        mask2d.name = 'REGION_MASK'
+        return mask2d
+    raise ValueError(f'unknown mask type: {mask_type}\nexpecting either "2d" or "3d"')
+    
+    
+
+def subplot_col_labels(axs, col_labels, xoff=0.):
+    assert len(axs) == len(col_labels)
+    for ax, col_label in zip(axs, col_labels):
+        ax.annotate(col_label,
+                    xy=(np.mean(ax.get_xlim())+xoff, np.max(ax.get_ylim()) - np.diff(ax.get_ylim())*0.12), 
+                    xytext=(np.mean(ax.get_xlim())+xoff, np.max(ax.get_ylim()) + np.diff(ax.get_ylim())*0.12), 
+                    fontsize='14', fontweight='bold', ha='center', va='center')
+
+def subplot_row_labels(axs, row_labels, yoff=0., xoff=0.):    
+    assert len(axs) == len(row_labels)
+    for ax, row_label in zip(axs, row_labels):
+        ax.annotate(row_label, xy=(0+xoff, 0.5+yoff), xytext=(-ax.yaxis.labelpad-12+xoff, 0+yoff),
+                    xycoords=ax.yaxis.label, textcoords='offset points',
+                    rotation=90,
+                    fontsize='14', fontweight='bold', ha='center', va='center')    
+        
+
+def get_ClusterClient():
+    import dask
+    from dask_jobqueue import PBSCluster
+    from dask.distributed import Client
+    cluster = PBSCluster(
+        cores=1,
+        memory='25GB',
+        processes=1,
+        queue='casper',
+        local_directory='$TMPDIR',
+        log_directory='$TMPDIR',
+        resource_spec='select=1:ncpus=1:mem=25GB',
+        project='NCGD0011',
+        walltime='01:00:00',
+        interface='ib0',)
+
+    dask.config.set({
+        'distributed.dashboard.link':
+        'https://jupyterhub.hpc.ucar.edu/stable/user/{USER}/proxy/{port}/status'
+    })
+    client = Client(cluster)
+    return cluster, client
+
