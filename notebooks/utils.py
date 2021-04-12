@@ -13,20 +13,23 @@ import pop_tools
 
 def savefig(plot_name):
     """Write figure"""
-
-    if 'CESM2_MARBL_FIGURE_DIR' in os.environ:
-        dirout = os.environ['CESM2_MARBL_FIGURE_DIR']
+    
+    if 'CO2_HOLE_FIGURE_DIR' in os.environ:
+        dirout = os.environ['CO2_HOLE_FIGURE_DIR']
     else:
         dirout = 'figures'
-
+    
     os.makedirs(dirout, exist_ok=True)
+    
+    plot_basename, ext = os.path.splitext(plot_name)
+    
+    for ext in ['pdf', 'png']:
+        plt.savefig(os.path.join(dirout, f'{plot_basename}.{ext}'), 
+                    dpi=300, 
+                    bbox_inches='tight', 
+                    metadata={'CreationDate': None})
 
-    plt.savefig(os.path.join(dirout, plot_name),
-                dpi=300,
-                bbox_inches='tight',
-                metadata={'CreationDate': None})
-
-
+        
 def write_ds_out(dso, file_out):
     file_out = os.path.realpath(file_out)
 
