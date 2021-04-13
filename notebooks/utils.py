@@ -44,7 +44,23 @@ def write_ds_out(dso, file_out):
     dso.to_zarr(file_out);
 
 
-def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None):
+def compute_kmt(da):
+    """compute KMT based on missing values"""
+    nk = len(da.z_t)
+    
+    KMT = np.zeros(da.shape[-2:]).astype(int)
+
+    #-- where surface is missing, KMT = 0, else full depth
+    KMT = np.where(np.isnan(da.data[0, :, :]), 0, nk)
+
+    #   where level k is missing: KMT = k, i.e. the level above in 1-based indexing
+    for k in range(1, nk):
+        KMT = np.where(np.isnan(da.data[k, :, :]) & (KMT > k), k, KMT)
+
+    return xr.DataArray(KMT, dims=('nlat', 'nlon'), name='KMT')
+
+
+def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None, replace_kmt=False):
     """
     Write ds to a temporary netCDF file, compute zonal mean for
     a given variable based on Keith L's fortran program, read
@@ -54,30 +70,29 @@ def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None):
     Pacific, Indian, and Atlantic to the coast of Antarctica (and does
     not provide separate Arctic Ocean, Lab Sea, etc regions)
     """
-
-    # xarray doesn't require the ".nc" suffix, but it's useful to know what the file is for
+    if replace_kmt and (var is None or ',' in var):
+        raise ValueError('if "replace_kmt" is True, a single "var" must be specified.')
+        
     ds_in_file = tempfile.NamedTemporaryFile(suffix='.nc')
     ds_out_file = tempfile.NamedTemporaryFile(suffix='.nc')
     
     ds = ds.copy()
-    ds.attrs = {} # for some reason, file attrs are 
+    ds.attrs = {} # for some reason, za does not like file attrs---perhaps "coordinates"?
     ds.to_netcdf(ds_in_file.name)
 
-    # Set up location of the zonal average executable
-    za_exe = os.path.join(os.path.sep,
-                          'glade',
-                          'u',
-                          'home',
-                          'klindsay',
-                          'bin',
-                          'zon_avg',
-                          'za')
+    za_exe = '/glade/u/home/klindsay/bin/zon_avg/za'
+
+    grid_file = None
+    rmask_file = None
+    
     if grid is not None:
         grid = pop_tools.get_grid(grid)
         
         grid_file = tempfile.NamedTemporaryFile(suffix='.nc')
         grid_file_name = grid_file.name
-        #del grid.attrs['region_mask_regions']
+        if replace_kmt:
+            grid['KMT'] = compute_kmt(ds[var])
+        
         grid.to_netcdf(grid_file_name)
         
     else:
@@ -103,20 +118,25 @@ def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None):
     # Use subprocess to call za, allows us to capture stdout and print it
     proc = subprocess.Popen(za_call, stdout=subprocess.PIPE)
     (out, err) = proc.communicate()
-       
+
     if not out:
         # Read in the newly-generated file
         print('za ran successfully, writing netcdf output')
         ds_out = xr.open_dataset(ds_out_file.name)
-
+        subprocess.check_call(['cp', '-v', ds_out_file.name, '/glade/scratch/mclong/junk3.nc'])
     else:
         print(f'za reported an error:\n{out.decode("utf-8")}')
         print(za_call)
         return 
     
-    # Delete the temporary files and return the new xarray dataset
+    # clean up
     ds_in_file.close()
     ds_out_file.close()        
+    if grid_file is not None:
+        grid_file.close()
+    if rmask_file is not None:
+        rmask_file.close()
+        
     return ds_out    
 
 
@@ -239,13 +259,18 @@ def get_ClusterClient():
     import dask
     from dask_jobqueue import PBSCluster
     from dask.distributed import Client
+    
+    TMPDIR = os.environ['TMPDIR']
+    if not TMPDIR:
+        
+    
     cluster = PBSCluster(
         cores=1,
         memory='25GB',
         processes=1,
         queue='casper',
-        local_directory='$TMPDIR',
-        log_directory='$TMPDIR',
+        local_directory=TMPDIR,
+        log_directory=TMPDIR,
         resource_spec='select=1:ncpus=1:mem=25GB',
         project='NCGD0011',
         walltime='01:00:00',

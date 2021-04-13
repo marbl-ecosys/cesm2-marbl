@@ -1,24 +1,50 @@
 def read_CESM_var(time_slice, variable, mean_dims=None):
     import intake
     import intake_esm
+    import xarray as xr
+    
+    is_derived = variable in derived_vars_defined
 
-    # Define catalog
-    catalog = intake.open_esm_datastore('data/campaign-cesm2-cmip6-timeseries.json')
-    dq = catalog.search(experiment='historical', component='ocn', variable=variable).to_dataset_dict(cdf_kwargs={'chunks':{'time': 4}})
+    if is_derived:
+        dv = derived_var(variable)
+        varlist = dv.dependent_vars
+    else:
+        varlist = [variable]
+        
+    catalog = intake.open_esm_datastore(
+        'data/campaign-cesm2-cmip6-timeseries.json'
+    )
+
+    dq = (catalog
+          .search(experiment='historical', 
+                  component='ocn', 
+                  variable=varlist
+                 )
+          .to_dataset_dict(
+              cdf_kwargs={'chunks': {'time': 4}},
+          ))
+
+    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 
+                 'TLAT', 'time', 'time_bound', 'member_id', 
+                 'ctrl_member_id',] + varlist
+
+    dset = dq['ocn.historical.pop.h']
+    dset = dset[[v for v in keep_vars if v in dset]].sel(time=time_slice)
+
+    if is_derived:
+        dset = dv.compute(dset)
 
     mean_kwargs = dict()
     if mean_dims:
         mean_kwargs['dim'] = mean_dims
 
-    # Define datasets
-    dataset = dq['ocn.historical.pop.h']
+    for v in dset.variables:
+        if '_FillValue' not in dset[v].encoding:
+            dset[v].encoding['_FillValue'] = None
+        
+    with xr.set_options(keep_attrs=True):
+        return dset.mean(**mean_kwargs).compute()
 
-    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 'TLAT', 'time', 'time_bound', 'member_id', 'ctrl_member_id', variable]
-    dataset = dataset.drop([v for v in dataset.variables if v not in keep_vars]).sel(time=time_slice).mean(**mean_kwargs).compute()
-
-    return(dataset)
-
-##################################################
 
 def read_obs(src, variable=None, freq='monthly'):
     import os
@@ -57,7 +83,6 @@ def read_obs(src, variable=None, freq='monthly'):
         ds = ds.isel(time=0)
     return(ds)
 
-##################################################
 
 def plot_surface_vals(variable, ds, da, da_obs, obs_src='obs', levels=None, bias_levels=None, force_units=None):
     import matplotlib.pyplot as plt
@@ -176,8 +201,6 @@ def plot_surface_vals(variable, ds, da, da_obs, obs_src='obs', levels=None, bias
         cb.set_label(da.attrs['units'])
 
 
-##################################################
-
 def plot_global_profile(variables, units, ds, da, obs):
     import matplotlib.pyplot as plt
 
@@ -278,5 +301,111 @@ def plot_zonal_averages_by_region(variables, region, da, obs, lat, z):
         ax.set(xlabel='Latitude')
         ax.invert_yaxis()
 
+    
+def _ensure_variables(ds, req_var):
+    """ensure that required variables are present"""
+    missing_var_error = False
+    for v in req_var:
+        if v not in ds:
+            print('ERROR: Missing required variable: {v}')
+            missing_var_error = True
+    if missing_var_error:
+        raise ValueError('Variables missing')
+
+                
+def derive_var_pCFC11(ds, drop_derivedfrom_vars=True):
+    """compute pCFC11"""
+    from calc import calc_cfc11sol
+
+    ds['pCFC11'] = ds['CFC11'] * 1e-9 / calc_cfc11sol(ds.SALT, ds.TEMP)
+    ds.pCFC11.attrs['long_name'] = 'pCFC-11'
+    ds.pCFC11.attrs['units'] = 'patm'
+    if 'coordinates' in ds.TEMP.attrs:
+        ds.pCFC11.attrs['coordinates'] = ds.TEMP.attrs['coordinates']
+    ds.pCFC11.encoding = ds.TEMP.encoding
+
+    if drop_derivedfrom_vars:
+        ds = ds.drop(['CFC11', 'TEMP', 'SALT'])
+
+    return ds
+
+
+def derive_var_pCFC12(ds, drop_derivedfrom_vars=True):
+    """compute pCFC12"""
+    from calc import calc_cfc12sol
+
+    ds['pCFC12'] = ds['CFC12'] * 1e-9 / calc_cfc12sol(ds['SALT'],ds['TEMP'])
+    ds.pCFC12.attrs['long_name'] = 'pCFC-12'
+    ds.pCFC12.attrs['units'] = 'patm'
+    if 'coordinates' in ds.TEMP.attrs:
+        ds.pCFC12.attrs['coordinates'] = ds.TEMP.attrs['coordinates']
+    ds.pCFC12.encoding = ds.TEMP.encoding
+
+    if drop_derivedfrom_vars:
+        ds = ds.drop(['CFC12', 'TEMP', 'SALT'])
+
+    return ds        
+
+def derive_var_Cant(ds, drop_derivedfrom_vars=True):
+    """compute Cant"""
+
+    ds['Cant'] = ds['DIC'] - ds['DIC_ALT_CO2']
+    ds.Cant.attrs = ds.DIC.attrs
+    ds.Cant.attrs['long_name'] = 'Anthropogenic CO$_2$'
+
+    if 'coordinates' in ds.DIC.attrs:
+        ds.Cant.attrs['coordinates'] = ds.DIC.attrs['coordinates']
+    ds.Cant.encoding = ds.DIC.encoding
+
+    if drop_derivedfrom_vars:
+        ds = ds.drop(['DIC', 'DIC_ALT_CO2'])
+
+    return ds     
+
+def derive_var_Del14C(ds, drop_derivedfrom_vars=True):
+    """compute Del14C"""
+
+    ds['Del14C'] = 1000. * (ds['ABIO_DIC14'] / ds['ABIO_DIC'] - 1.)
+    ds.Del14C.attrs = ds.ABIO_DIC14.attrs
+    ds.Del14C.attrs['long_name'] = '$\Delta^{14}$C'
+    ds.Del14C.attrs['units'] = 'permille'    
+
+    if 'coordinates' in ds.ABIO_DIC14.attrs:
+        ds.Del14C.attrs['coordinates'] = ds.ABIO_DIC14.attrs['coordinates']
+    ds.Del14C.encoding = ds.ABIO_DIC14.encoding
+
+    if drop_derivedfrom_vars:
+        ds = ds.drop(['ABIO_DIC14', 'ABIO_DIC'])
+
+    return ds     
+
+
+derived_vars_defined = dict(
+    pCFC11=dict(
+        dependent_vars=['CFC11', 'TEMP', 'SALT'],
+        method=derive_var_pCFC11,
+    ),
+    pCFC12=dict(
+        dependent_vars=['CFC12', 'TEMP', 'SALT'],
+        method=derive_var_pCFC12,
+    ),
+    Cant=dict(
+        dependent_vars=['DIC', 'DIC_ALT_CO2'],
+        method=derive_var_Cant,        
+    ),
+    Del14C=dict(
+        dependent_vars=['ABIO_DIC14', 'ABIO_DIC'],
+        method=derive_var_Del14C,        
+    ),    
+)
+class derived_var(object):      
+    def __init__(self, varname):
+        assert varname in derived_vars_defined
+        self.varname = varname
+        self.dependent_vars = derived_vars_defined[self.varname]['dependent_vars']
+        self._callable = derived_vars_defined[self.varname]['method']
         
-        
+    def compute(self, ds, **kwargs):
+        _ensure_variables(ds, self.dependent_vars)
+        return self._callable(ds, **kwargs)
+    
