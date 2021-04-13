@@ -262,7 +262,7 @@ def get_ClusterClient():
     
     TMPDIR = os.environ['TMPDIR']
     if not TMPDIR:
-        
+        raise ValueError('set TMPDIR')
     
     cluster = PBSCluster(
         cores=1,
