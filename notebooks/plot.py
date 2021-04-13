@@ -28,7 +28,7 @@ units = dict(
 )
 
 
-def za_obs_comparison(ds_zonal_mean, field, levels, levels_bias):
+def za_obs_comparison(ds_zonal_mean, field, levels, levels_bias, col_name):
     """produce a plot of zonal mean fields from model, obs, and bias"""
     cmap_field = cmocean.cm.dense
     cmap_bias = cmocean.cm.balance
@@ -55,7 +55,7 @@ def za_obs_comparison(ds_zonal_mean, field, levels, levels_bias):
 
     gss = []
     plot_basins = ['Atlantic Ocean', 'Pacific Ocean']
-    col_name = ['CESM2', 'GLODAP', 'bias']
+        
     fig = plt.figure(figsize=(11, 6))
     gs = gridspec.GridSpec(len(plot_basins), 3)
 
