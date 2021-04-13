@@ -168,30 +168,48 @@ def za_obs_comparison(ds_zonal_mean, field, levels, levels_bias):
 
 
     
-def canvas(*args, figsize=(6, 4), use_gridspec=False, **gridspec_kwargs):
+def nice_levels(da, max_steps=30, outside=False):
+    """
+    Return nice contour levels
+    outside indicates whether the contour should be inside or outside the bounds
+    """
+    import sys
+    
+    cmin = da.min().values
+    cmax = da.max().min()    
+    
+    table = [1., 2., 2.5, 4., 5., 10., 20., 25., 40., 50.,
+             100., 200., 250., 400., 500.]
+    npts = len(table)
 
-    assert len(args), 'Args required'
-    assert len(args) <= 2, 'Too many args'
-    
-    if len(args) == 2:
-        nrow = args[0]
-        ncol = args[1]
+    d = 10.**(np.floor(np.log10(cmax-cmin))-2.)
+
+    u = sys.float_info.max
+    step_size = sys.float_info.max
+    am2 = 0.
+    ax2 = 0.
+    if outside:
+        for i in range(npts):
+            t = table[i] * d
+            am1 = np.floor(cmin/t) * t
+            ax1 = np.ceil(cmax/t) * t
+
+            if (i == npts-1 and step_size == u) or ( (t <= step_size) and ((ax1-am1)/t <= (max_steps-1)) ):
+                step_size = t
+                ax2 = ax1
+                am2 = am1
     else:
-        npanel = args[0]
-        nrow = int(np.sqrt(npanel))
-        ncol = int(npanel/nrow) + min(1, npanel%nrow)
-    
-    if use_gridspec:
-        fig = plt.figure(figsize=(figsize[0]*ncol, figsize[1]*nrow)) #dpi=300)
-        gs = gridspec.GridSpec(nrows=nrow, ncols=ncol, **gridspec_kwargs)
-        axs = np.empty((nrow, ncol)).astype(object)
-        for i, j in product(range(nrow), range(ncol)):
-            axs[i, j] = plt.subplot(gs[i, j])
-        return fig, axs
-    else:
-        return plt.subplots(
-            nrow, ncol, 
-            figsize=(figsize[0]*ncol, figsize[1]*nrow),                       
-            constrained_layout=False,
-            squeeze=False,
-        )       
+        for i in range(npts):
+            t = table[i] * d
+            am1 = np.ceil(cmin/t) * t
+            ax1 = np.floor(cmax/t) * t
+
+            if (i == npts-1 and step_size == u) or ( (t <= step_size) and ((ax1-am1)/t <= (max_steps-1)) ):
+                step_size = t
+                ax2 = ax1
+                am2 = am1
+
+    min_out = am2
+    max_out = ax2
+
+    return np.arange(min_out, max_out + step_size, step_size)
