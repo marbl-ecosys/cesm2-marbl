@@ -260,17 +260,15 @@ def get_ClusterClient():
     from dask_jobqueue import PBSCluster
     from dask.distributed import Client
     
-    TMPDIR = os.environ['TMPDIR']
-    if not TMPDIR:
-        raise ValueError('set TMPDIR')
+    USER = os.environ['USER']
     
     cluster = PBSCluster(
         cores=1,
         memory='25GB',
         processes=1,
         queue='casper',
-        local_directory=TMPDIR,
-        log_directory=TMPDIR,
+        local_directory=f'/glade/scratch/{USER}/dask-workers',
+        log_directory=f'/glade/scratch/{USER}/dask-workers',
         resource_spec='select=1:ncpus=1:mem=25GB',
         project='NCGD0011',
         walltime='01:00:00',
