@@ -213,3 +213,4 @@ def nice_levels(da, max_steps=30, outside=False):
     max_out = ax2
 
     return np.arange(min_out, max_out + step_size, step_size)
+
