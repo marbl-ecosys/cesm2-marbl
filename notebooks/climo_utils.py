@@ -84,6 +84,25 @@ def read_obs(src, variable=None, freq='monthly'):
     return(ds)
 
 
+def get_fesedflux_forcing():
+    import xarray as xr
+    µmolm2d_to_mmolm2yr = 1e-3 * 365.
+    
+    file_fesedflux = '/glade/p/cesmdata/cseg/inputdata/ocn/pop/gx1v6/forcing/fesedfluxTot_gx1v6_cesm2_2018_c180618.nc'
+    file_feventflux = '/glade/p/cesmdata/cseg/inputdata/ocn/pop/gx1v6/forcing/feventflux_gx1v6_5gmol_cesm1_97_2017.nc'
+
+    dsi = xr.merge((
+        xr.open_dataset(file_feventflux).rename({'FESEDFLUXIN': 'Fe_ventflux'}) * µmolm2d_to_mmolm2yr,
+        xr.open_dataset(file_fesedflux).rename({'FESEDFLUXIN': 'Fe_sedflux'}) * µmolm2d_to_mmolm2yr,
+    )).rename({'z': 'z_t', 'y': 'nlat', 'x': 'nlon'})
+
+    dsi['Fe_ventflux'] = dsi.Fe_ventflux.sum('z_t') # since units are already /m^2, we can just sum to integrate in z
+    dsi['Fe_sedflux'] = dsi.Fe_sedflux.sum('z_t')
+
+    dsi.Fe_ventflux.attrs['units'] = 'mmol m$^{-2}$ yr$^{-1}$'
+    dsi.Fe_sedflux.attrs['units'] = 'mmol m$^{-2}$ yr$^{-1}$'
+    return dsi
+
 def plot_surface_vals(variable, ds, da, da_obs, obs_src='obs', levels=None, bias_levels=None, force_units=None):
     import matplotlib.pyplot as plt
     from matplotlib.colors import BoundaryNorm
