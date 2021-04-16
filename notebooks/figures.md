@@ -164,6 +164,18 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
+### Fe obs comparison: PDF
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/iron-global-ocean-obs-PDF.png" style="background:none; border:none; box-shadow:none;" width=1000px>
+
+---
+
+### Fe obs comparison: maps
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/iron-concentration-maps.png" style="background:none; border:none; box-shadow:none;" width=1000px>
+
+---
+
 ### Transient response of the biological pump
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/global-timeseries-bio-pump.png" style="background:none; border:none; box-shadow:none;" width=1000px>

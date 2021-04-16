@@ -252,7 +252,8 @@ def subplot_row_labels(axs, row_labels, yoff=0., xoff=0.):
         ax.annotate(row_label, xy=(0+xoff, 0.5+yoff), xytext=(-ax.yaxis.labelpad-12+xoff, 0+yoff),
                     xycoords=ax.yaxis.label, textcoords='offset points',
                     rotation=90,
-                    fontsize='14', fontweight='bold', ha='center', va='center')    
+                    fontsize='14', 
+                    fontweight='bold', ha='center', va='center')    
         
 
 def get_ClusterClient():
