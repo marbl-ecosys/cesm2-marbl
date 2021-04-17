@@ -244,3 +244,74 @@ def canvas(*args, figsize=(6, 4), use_gridspec=False, **gridspec_kwargs):
             constrained_layout=False,
             squeeze=False,
         )  
+    
+def moc(MOC):
+    fig = plt.figure(figsize=(14, 4))
+    gs = gridspec.GridSpec(
+        1, len(MOC.transport_reg), 
+        wspace=0.1,
+    )
+
+    lo, hi, dc = -40., 40., 4
+    cnlevels = np.arange(lo, hi+dc, dc)
+
+    axs_surf = []
+    axs_deep = []
+    for n, transport_reg in enumerate(MOC.transport_reg.values):
+        gsi = gridspec.GridSpecFromSubplotSpec(100, 1, subplot_spec=gs[0, n])
+
+        ax_surf = fig.add_subplot(gsi[:45, 0])
+        ax_deep = fig.add_subplot(gsi[47:, 0])    
+
+        ax_surf.set_facecolor('gainsboro')
+        ax_deep.set_facecolor('gainsboro')
+
+        axs_surf.append(ax_surf)
+        axs_deep.append(ax_deep)    
+
+        moc = MOC.sel(transport_reg=transport_reg)
+        for ax in [ax_surf, ax_deep]:
+            cs = ax.contour(
+                moc.lat_aux_grid, moc.moc_z*1e-2, moc,
+                colors='k',
+                linewidths=1,
+                levels=cnlevels,
+            )
+
+            cs.levels = [f'{val:g}' for val in cs.levels]
+            fmt = '%r'
+            lb = plt.clabel(cs, fontsize=8, inline=True, fmt=fmt)
+
+            mesh = ax.contourf(
+                moc.lat_aux_grid, moc.moc_z*1e-2, moc,
+                levels=cnlevels,
+                cmap='PRGn',
+                extend='both',
+                zorder=-1000,
+            )
+
+        ax_surf.set_ylim([1000., 0.])
+        ax_surf.set_yticks(np.arange(0, 1000, 200))
+        ax_surf.set_xticklabels([])
+        ax_surf.xaxis.set_ticks_position('top')
+        ax_surf.set_xticks(np.arange(-90, 110, 30))
+
+        ax_deep.set_ylim([5000., 1000.])
+        ax_deep.xaxis.set_ticks_position('bottom')
+        ax_deep.set_xticks(np.arange(-90, 110, 30))
+
+        if n == 0:
+            ax_deep.set_ylabel('Depth [m]')
+            ax_deep.yaxis.set_label_coords(-0.18, 1.05)
+        else:
+            ax_surf.set_yticklabels('')
+            ax_deep.set_yticklabels('')
+
+        ax_deep.set_xlabel('Latitude [°N]')
+
+        ax_surf.set_title('MOC', loc='left')
+        ax_surf.set_title(transport_reg, loc='center')    
+        ax_surf.set_title('Sv', loc='right')                            
+        ax_deep.set_xticklabels('')
+
+    utils.label_plots(fig, [ax for ax in axs_surf] , xoff=-0.02, yoff=0.06)    

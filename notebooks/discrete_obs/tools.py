@@ -89,7 +89,12 @@ def open_datastream(obs_name):
                 values[values == -1e10] = np.nan
                 lines.append({k: v for k, v in zip(columns, values)})
                 part = 0
-    return pd.DataFrame(lines).astype(dtypes).drop(['gridx', 'gridy', 'gridlevel', 'inregion'], axis=1)
+                
+    df = pd.DataFrame(lines).astype(dtypes).drop(['gridx', 'gridy', 'gridlevel', 'inregion'], axis=1)
+    if obs_name == 'DOM':
+        df['DOM_obs'] = df.DOM_obs.replace({-1.: np.nan})
+    
+    return df
 
 
 @pd.api.extensions.register_dataframe_accessor('obs_stream')
@@ -105,7 +110,7 @@ class obs_datastream:
             if field not in obj.columns:
                 raise AttributeError(f"Must have '{field}' column.")
 
-    def add_model_field(self, da_in, model_grid=None, method='bilinear'):
+    def add_model_field(self, da_in, model_grid=None, field_name=None, method='bilinear'):
         """return a DataFrame with obs and model"""
         
         # determine dimensions
@@ -152,12 +157,13 @@ class obs_datastream:
             regrid_method=ESMF_RegridMethod,
             unmapped_action=ESMF.UnmappedAction.ERROR,
         )
-
-        field_name = da_in.name
-        i = 1
-        while field_name in df:
-            field_name = f'{da_in.name}_{i}'
-            i += 1
+        
+        if field_name is None:
+            field_name = da_in.name
+            i = 1
+            while field_name in df:
+                field_name = f'{da_in.name}_{i}'
+                i += 1
 
         # 2D field
         if nk == 0:

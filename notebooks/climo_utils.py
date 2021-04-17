@@ -1,4 +1,4 @@
-def read_CESM_var(time_slice, variable, mean_dims=None):
+def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
     import intake
     import intake_esm
     import xarray as xr
@@ -24,7 +24,7 @@ def read_CESM_var(time_slice, variable, mean_dims=None):
               cdf_kwargs={'chunks': {'time': 4}},
           ))
 
-    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 
+    keep_vars = ['REGION_MASK', 'z_t', 'dz', 'TAREA', 'TLONG', 'KMT', 
                  'TLAT', 'time', 'time_bound', 'member_id', 
                  'ctrl_member_id',] + varlist
 
@@ -34,16 +34,18 @@ def read_CESM_var(time_slice, variable, mean_dims=None):
     if is_derived:
         dset = dv.compute(dset)
 
-    mean_kwargs = dict()
-    if mean_dims:
-        mean_kwargs['dim'] = mean_dims
-
+    if mean_dims is not None:
+        with xr.set_options(keep_attrs=True):
+            dset = dset.mean(dim=mean_dims)
+    
+    if postprocess is not None:
+        dset = postprocess(dset)
+        
     for v in dset.variables:
         if '_FillValue' not in dset[v].encoding:
             dset[v].encoding['_FillValue'] = None
         
-    with xr.set_options(keep_attrs=True):
-        return dset.mean(**mean_kwargs).compute()
+    return dset.compute()
 
 
 def read_obs(src, variable=None, freq='monthly'):
@@ -245,12 +247,10 @@ def plot_global_profile(variables, units, ds, da, obs):
         plt.gca().invert_yaxis()
         ax.legend()
 
-##################################################
 
 def return_magnitude_in_units(pint_obj, units):
     return((pint_obj.to('mmol/m^3')).magnitude)
 
-##################################################
 
 def plot_zonal_averages_by_region(variables, region, da, obs, lat, z):
     import matplotlib.pyplot as plt
@@ -415,7 +415,7 @@ derived_vars_defined = dict(
     Del14C=dict(
         dependent_vars=['ABIO_DIC14', 'ABIO_DIC'],
         method=derive_var_Del14C,        
-    ),    
+    ),        
 )
 class derived_var(object):      
     def __init__(self, varname):
@@ -427,4 +427,6 @@ class derived_var(object):
     def compute(self, ds, **kwargs):
         _ensure_variables(ds, self.dependent_vars)
         return self._callable(ds, **kwargs)
+    
+    
     
