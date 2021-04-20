@@ -154,15 +154,15 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
-### DOM
+### DOM: Obs comparison (scatter)
 
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-ocean-obs-PDF.png" 
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-model-obs-scatter.png" 
      style="background:none; border:none; box-shadow:none;" 
      width=1000px>
 
 ---
 
-### DOM maps
+### DOM: Obs comparison (maps)
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-concentration-maps.png" 
      style="background:none; border:none; box-shadow:none;" 
