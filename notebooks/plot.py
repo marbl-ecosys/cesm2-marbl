@@ -177,8 +177,8 @@ def nice_levels(da, max_steps=30, outside=False):
     """
     import sys
     
-    cmin = da.min().values
-    cmax = da.max().min()    
+    cmin = da.min()
+    cmax = da.max()
     
     table = [1., 2., 2.5, 4., 5., 10., 20., 25., 40., 50.,
              100., 200., 250., 400., 500.]

@@ -58,12 +58,9 @@ def _esmf_locstream(lon, lat):
 def open_datastream(obs_name):
     """open raw dataset"""
     
-    columns = ['month', 'lon', 'lat', 'depth', f'{obs_name}_obs', 'gridx', 'gridy', 'gridlevel', 'inregion']
-    dtypes = {k: 'int32' for k in ['month', 'gridx', 'gridy', 'gridlevel', 'inregion']}
-
     filename_dict = dict(
-        dFe=f'{path_to_here}/master_Fe_gx3v7.txt',
-        DOM=f'{path_to_here}/DOMdatabaseDec2012_gx3v7',
+        dFe=f'{path_to_here}/dFe-database-2021-04-20.csv',
+        DOM=f'{path_to_here}/DOMobs.csv',
         test=f'{path_to_here}/dfe-test.csv',
     )
 
@@ -72,29 +69,7 @@ def open_datastream(obs_name):
     except:
         raise ValueError(f'unknown obs name {obs_name}')
 
-    if obs_name in ['test']:
-        return pd.read_csv(filename)
-    
-    
-    with open(filename) as fid:
-        lines = []
-        part = 0
-        for line in fid:
-            if part == 0:
-                values = [np.float(s) for s in line.split()]
-                part = 1
-            else: 
-                values.extend([np.float(s) for s in line.split()])
-                values = np.array(values)
-                values[values == -1e10] = np.nan
-                lines.append({k: v for k, v in zip(columns, values)})
-                part = 0
-                
-    df = pd.DataFrame(lines).astype(dtypes).drop(['gridx', 'gridy', 'gridlevel', 'inregion'], axis=1)
-    if obs_name == 'DOM':
-        df['DOM_obs'] = df.DOM_obs.replace({-1.: np.nan})
-    
-    return df
+    return pd.read_csv(filename, na_values=-999.).dropna(axis=0, how='all')
 
 
 @pd.api.extensions.register_dataframe_accessor('obs_stream')
@@ -183,6 +158,6 @@ class obs_datastream:
 
             dstfield_z = np.ones((n_obs)) * np.nan
             for n in range(n_obs):
-                dstfield_z[n] = np.interp(df.depth[n]*1e2, da_in.z_t, da_out_columns[:, n])            
+                dstfield_z[n] = np.interp(df.depth.values[n]*1e2, da_in.z_t, da_out_columns[:, n])            
             
             df[field_name] = dstfield_z

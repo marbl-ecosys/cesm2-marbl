@@ -3,19 +3,19 @@ channels:
 - conda-forge
 - defaults
 dependencies:
-- bokeh #==1.4.0
+- bokeh==1.4
 - bottleneck
 - cartopy
 - cf_units
 - cftime=1.0.3.4
 - cmocean
-- dask #==2.14.0
-- distributed #==2.14.0
-- dask-jobqueue #==0.7.1
+- dask==2.14
+- distributed==2.14
+- dask-jobqueue==0.7.1
 - dask-mpi
 - esmpy
 - intake
-- intake-esm #=2019.12.13
+- intake-esm 
 - ipywidgets
 - jupyter_contrib_nbextensions
 - jupyterlab
@@ -40,7 +40,7 @@ dependencies:
 - tqdm
 - watermark
 - xarray
-- xesmf=0.1.1
+- xesmf #=0.1.1
 - xgcm
 - xhistogram
 - xrft

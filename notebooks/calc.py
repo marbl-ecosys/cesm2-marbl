@@ -1,10 +1,11 @@
 import os
+
+from scipy import interpolate
 import numpy as np
 import xarray as xr
 
-
-os.environ['CESMDATAROOT'] = '/glade/scratch/mclong/inputdata'
 import pop_tools
+
 
 def calc_cfc12sol(S, T):
     return _calc_cfcsol(S, T, 12)
@@ -62,54 +63,165 @@ def _calc_cfcsol(PS, PT, kn):
     return SOLUBILITY_CFC # mol/m^3/patm
 
 
-def mld_dsigma(SALT, TEMP, KMT, dsigma, z_t=None):
+
+
+def mld_dsigma(SALT, TEMP, dsigma=0.03, rho_chunks={'nlat': 16, 'nlon': 16}):
+    """
+    Compute MLD based on ∆σ criterion. Uses xarray.map_blocks.
+    
+    Parameters
+    ----------
+    
+    SALT : xarray.DataArray
+      Salinity
+    TEMP : xarray.DataArray
+      Potential temperature
+    dsigma : float, optional
+      The value for ∆σ.
+      
+    Returns
+    -------
+    
+    MLD : xarray.DataArray
+      The MLD (m) defined as the point in the water column where
+      density exceeds rho[0] + dsigma.      
+    """
+    
+    # determine dimensionality
     dims_in = SALT.dims
     assert dims_in == TEMP.dims, 'dimension mismatch'
-    if z_t is None:
-        try:
-            z_t = SALT.z_t if 'z_t' in SALT.coords else TEMP.z_t
-        except:
-            raise ValueError('z_t not found in SALT or TEMP coords; pass it in explicitly')
+    assert 'z_t' in SALT.coords, 'z_t not found in SALT coords'
+
+   
+    # drop ancillary coordinates (this may not be necessary)
+    SALT = SALT.reset_coords(drop=True)
+    TEMP = TEMP.reset_coords(drop=True)
     
-    lateral_dims = dims_in[-2:]
-    vertical_dim = dims_in[-3]
-    other_dims = set(dims_in) - set(lateral_dims) - {vertical_dim}    
-
-    rho = pop_tools.eos(SALT, TEMP, depth=z_t * 1e-2)
-    rho = rho - 1000.
-
-    dims_out_ordered = [d for d in dims_in if d != vertical_dim]
-    if not other_dims:
-        rho = rho.expand_dims({'dummy': 1})
-        other_dims = ('dummy',)
-        dims_out_ordered = [d for d in dims_in if d != vertical_dim] + ['dummy']
-
-    rho_stack = rho.stack(other_dims=other_dims, lateral_dims=lateral_dims,)
-
-    kmt_stack = KMT.stack(lateral_dims=lateral_dims)
-    mld_stack = xr.full_like(rho_stack.isel({vertical_dim: 0}), 
-                             fill_value=np.nan).drop(vertical_dim)
+    # compute density
+    rho = pop_tools.eos(SALT.chunk({'z_t': 10}), 
+                        TEMP.chunk({'z_t': 10}), 
+                        depth=SALT.z_t * 0.).compute()
     
-    mld_stack.name = f'MLD_{dsigma:g}'.replace('0.', '')
+    if 'nlat' in rho.dims:
+        rho = rho.assign_coords({
+            'nlat': xr.DataArray(np.arange(len(SALT.nlat)), dims=('nlat')),
+            'nlon': xr.DataArray(np.arange(len(SALT.nlon)), dims=('nlon')),
+        })
+    rho = rho.chunk(rho_chunks).persist()
+    
+    # compute and return MLD
+    template = rho.isel(z_t=0).drop('z_t')
+    template.attrs['long_name'] = 'MLD'
+    template.attrs['units'] = SALT.z_t.attrs['units']
+    template.name = 'MLD'
+    
+    return xr.map_blocks(
+        _interp_mld, rho,
+        kwargs=dict(dsigma=dsigma), 
+        template=template,
+    )
+    
+    
+def _interp_mld(rho_in, dsigma=0.03):
+    """compute MLD at point using interpolation"""
+    
+    non_vertical_dims = [d for d in rho_in.dims if d not in ['z_t']]
+    rho_stack = rho_in.stack(non_vertical_dims=non_vertical_dims) 
+    mld_stack = xr.full_like(rho_stack.isel(z_t=slice(0, 1)), fill_value=np.nan)
+    mld_stack.name = 'MLD'
+    z_t = rho_in.z_t
+    
+    for i in range(len(rho_stack.non_vertical_dims)):
+        # TODO: get more specific about extrapolation rules
+        #       desired behavior: all rho < rho[0] + dsigma, 
+        #       return z_t[np.argmax(rho)]?
+        if np.isnan(rho_stack[:, i]).all():
+            continue
 
-    z_t_data = z_t.values * 1e-2 # convert from cm to m 
-    for l in range(len(rho_stack.other_dims)):
-        for ij in range(len(rho_stack.lateral_dims)):
-            kmt_ij = kmt_stack[ij].values
-            if kmt_ij == 0:
-                continue
-            rho_ijl = rho_stack[:kmt_ij, l, ij]
-            z = z_t_data[:kmt_ij]
-            rho_ijl_sort, I = np.unique(rho_ijl, return_index=True)
-            z = z[I]
-            if len(I) >= 3:
-                mld_stack[l, ij] = np.interp(rho_ijl_sort[0] + dsigma, 
-                                             rho_ijl_sort, z)
-                
-    mld = mld_stack.unstack().transpose(*dims_out_ordered)
-    if 'dummy' in mld.dims:
-        mld = mld.isel(dummy=0).drop('dummy')
-    mld.attrs['long_name'] = 'MLD'
-    mld.attrs['definition'] = f'$\Delta\sigma = {dsigma:0.3f}$'
-    mld.attrs['units'] = 'm'
-    return mld
+        if (rho_stack[:, i] < rho_stack[0, i] + dsigma).all():
+            k = np.where(~np.isnan(rho_stack[:, i]))[0]
+            mld_stack[:, i] = z_t[k[-1]]
+        else: 
+            f = interpolate.interp1d(
+                rho_stack[:, i], z_t, 
+                assume_sorted=False,
+            )
+            mld_stack[:, i] = f(rho_stack[0, i] + dsigma)
+
+    return mld_stack.unstack().isel(z_t=0, drop=True).transpose(*non_vertical_dims)
+
+
+
+# def mld_dsigma(SALT, TEMP, dsigma=0.03):
+#     """
+#     Compute MLD based on ∆σ criterion. Uses xarray.map_blocks.
+    
+#     Parameters
+#     ----------
+    
+#     SALT : xarray.DataArray
+#       Salinity
+#     TEMP : xarray.DataArray
+#       Potential temperature
+#     dsigma : float, optional
+#       The value for ∆σ.
+      
+#     Returns
+#     -------
+    
+#     MLD : xarray.DataArray
+#       The MLD (m) defined as the point in the water column where
+#       density exceeds rho[0] + dsigma.      
+#     """
+    
+#     # determine dimensionality
+#     dims_in = SALT.dims
+#     assert dims_in == TEMP.dims, 'dimension mismatch'
+#     assert 'z_t' in SALT.coords, 'z_t not found in SALT coords'
+
+#     # assume vertical dimension is called "z_t"
+#     non_vertical_dims = set(dims_in) - {'z_t'}
+    
+#     # drop ancillary coordinates (this may not be necessary)
+#     SALT = SALT.reset_coords(drop=True)
+#     TEMP = TEMP.reset_coords(drop=True)
+    
+#     # define chunks in each non-vertical dimension
+#     chunk_dict = {k: 1 for k in non_vertical_dims}
+    
+#     # compute density
+#     rho = pop_tools.eos(SALT, 
+#                         TEMP, 
+#                         depth=SALT.z_t * 1e-2).compute()
+        
+#     print('\trho computation complete')
+#     # compute and return MLD
+#     rho = rho.chunk(chunk_dict)
+#     return xr.map_blocks(
+#         _interp_mld, rho,
+#         kwargs=dict(dsigma=dsigma), 
+#         template=rho.isel(z_t=0).drop('z_t').reset_coords(drop=True),
+#     ).to_dataset()
+    
+    
+# def _interp_mld(rho_1d, dsigma=0.03):
+#     """compute MLD at point using interpolation"""
+#     mld = np.empty(rho_1d.isel(z_t=0).shape)
+#     if np.isnan(rho_1d).all():
+#         mld[:] = np.nan
+#     else:
+#         # TODO: get more specific about extrapolation rules
+#         #       desired behavior: all rho < rho[0] + dsigma, 
+#         #       return z_t[np.argmax(rho)]?
+#         f = interpolate.interp1d(
+#             rho_1d.squeeze(), rho_1d.z_t*1e-2, 
+#             assume_sorted=False,
+#         )
+#         mld[:] = f(rho_1d.isel(z_t=0) + dsigma)
+    
+#     return xr.DataArray(
+#         mld, 
+#         dims=[k for k in rho_1d.dims if k != 'z_t'], 
+#         coords={k: v for k, v in rho_1d.coords.items() if k != 'z_t'},
+#         attrs={'long_name': 'MLD', 'units': 'm', 'note': f'Dsigma = {dsigma:g}'}
+#     )    

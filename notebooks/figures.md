@@ -114,6 +114,14 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
+### Mixed layer depth
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/mld-maps.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
 ### Surface chlorophyll
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/chl-surface-maps.png" 
@@ -141,6 +149,22 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 ### Biological pump: Mineral fluxes
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-CaCO2-SiO2.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### DOM
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-ocean-obs-PDF.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### DOM maps
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-concentration-maps.png" 
      style="background:none; border:none; box-shadow:none;" 
      width=1000px>
 

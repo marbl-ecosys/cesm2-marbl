@@ -272,7 +272,7 @@ def get_ClusterClient():
         log_directory=f'/glade/scratch/{USER}/dask-workers',
         resource_spec='select=1:ncpus=1:mem=25GB',
         project='NCGD0011',
-        walltime='01:00:00',
+        walltime='06:00:00',
         interface='ib0',)
 
     dask.config.set({

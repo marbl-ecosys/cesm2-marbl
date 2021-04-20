@@ -59,6 +59,7 @@ def read_obs(src, variable=None, freq='monthly'):
         freq = 'mon'
     if freq == 'annual':
         freq = 'ann'
+    
     xr_kwargs = dict()
     if src == 'WOA':
         if freq not in ['mon']:

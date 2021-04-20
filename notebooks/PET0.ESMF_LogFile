@@ -1,0 +1,9 @@
+20210420 052628.567 ERROR            PET0 Destination id=1 NOT found in weight matrix.
+20210420 052628.567 ERROR            PET0 ESMCI_Mesh_Regrid_Glue.C:332 ESMCI_regrid_create() Arguments are incompatible  - - There exist destination points (e.g. id=1) which can't be mapped to any source cell
+20210420 052628.567 ERROR            PET0 ESMCI_Mesh_Regrid_Glue.C:556 ESMCI_regrid_create() Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMCI_MeshCap.C:624 MeshCap::regrid_create() Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMF_Regrid.F90:372 ESMF_RegridStore Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMF_FieldRegrid.F90:1377 ESMF_FieldRegridStoreNX Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMF_Field_C.F90:1133 f_esmf_regridstore Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMCI_Field.C:1468 ESMCI::Field::regridstore() Arguments are incompatible  - Internal subroutine call returned Error
+20210420 052628.567 ERROR            PET0 ESMC_Field.C:459 ESMC_FieldRegridStore() Arguments are incompatible  - Internal subroutine call returned Error
