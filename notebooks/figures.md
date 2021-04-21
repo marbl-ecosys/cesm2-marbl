@@ -82,6 +82,14 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
+### Ventilation biases: C<sub>ant</sub> (v1)
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/za-obs-comparison-Cant_v1.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
 ### Ventilation biases: <sup>14</sup>C
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/za-obs-comparison-Del14C.png" 

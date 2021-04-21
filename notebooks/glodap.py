@@ -165,7 +165,7 @@ def _gen_v1_dataset(clobber=True):
 
             ds[varname] = xr.DataArray(data, dims=('depth', 'lat', 'lon'))
         ds = ds.rename({
-            'AnthCO2': 'Cant', 
+            'AnthCO2': 'Cant_v1', 
             'TCO2': 'DIC', 
             'Alk': 
             'ALK', 
@@ -198,7 +198,7 @@ def open_glodap(product='GLODAPv1'):
         return ds
     
 
-def open_glodap_pop_grid(product='GLODAPv1', model_grid='POP_gx1v7', method='conserve'):
+def open_glodap_pop_grid(product='GLODAPv1', model_grid='POP_gx1v7', method='bilinear'):
     """return GLODAP dataset"""
     assert product in known_products
     
@@ -229,7 +229,7 @@ def open_glodap_pop_grid(product='GLODAPv1', model_grid='POP_gx1v7', method='con
 
 
 def add_coords_regrid_vertical(ds_dst_xy, pop_grid='POP_gx1v7'):
-        
+    """perform vertical regridding"""    
     ydim = 'lat'
     xdim = 'lon'
     zdim = 'depth'
