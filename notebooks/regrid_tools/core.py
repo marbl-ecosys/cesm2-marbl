@@ -62,7 +62,8 @@ class grid(object):
             f'grid: {self.grid_name}\ndims: {self.dims}\nfile: {self.grid_file}'
         )        
 
-def latlon_to_scrip(nx, ny, lon0=-180., grid_imask=None, file_out=None):
+def latlon_to_scrip(nx, ny, lon0=-180., grid_imask=None, 
+                    file_out=None,):
     """Generate a SCRIP grid file for a regular lat x lon grid.
     
     Parameters
@@ -92,7 +93,7 @@ def latlon_to_scrip(nx, ny, lon0=-180., grid_imask=None, file_out=None):
     dy = 180. / ny
     lat = np.arange(-90. + dy / 2., 90., dy)
     lon = np.arange(lon0 + dx / 2., lon0 + 360., dx)
-
+    
     # make 2D
     y_center = np.broadcast_to(lat[:, None], (ny, nx))
     x_center = np.broadcast_to(lon[None, :], (ny, nx))
