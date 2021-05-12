@@ -20,6 +20,7 @@ known_products = [
     # 'GLODAPv2_Mapped_Climatologies', # this appears to be on pressure surfaces
 ]
 
+
 def _ensure_datafiles(product_name='GLODAPv2.2016b_MappedClimatologies'):
     """
     get data files from website and return dictionary
@@ -88,7 +89,7 @@ def _ensure_datafiles_v1():
     return {os.path.basename(f).split('.')[-3].replace('-', ''): f for f in files}    
 
 
-def _gen_v1_dataset(clobber=True):
+def _gen_v1_dataset(clobber=False):
     """convert *.data.txt to dataset"""
     
     netcdf_file = f'{cache_dir}/GLODAPv1/GLODAPv1.nc'
@@ -113,14 +114,14 @@ def _gen_v1_dataset(clobber=True):
             np.array([0, 5, 15, 25, 40, 60, 85, 110, 135, 175, 
                       225, 275, 350, 450, 550, 650, 750, 850, 950, 
                        1050, 1150, 1250, 1350, 1450, 1600, 1850, 2250, 
-                       2750, 3250, 3750, 4250, 4750, 5250, 6500]).astype(np.float), 
+                       2750, 3250, 3750, 4250, 4750, 5250, 6500]).astype(np.float64), 
             dims=('depth_edges',),
         )
 
         depth = xr.DataArray(
             np.array([0, 10, 20, 30, 50, 75, 100, 125, 150, 200,250,300,400,
-                      500,600,700,800,900,1000,1100,1200,1300,1400,1500,1750,
-                      2000,2500,3000,3500,4000,4500,5000,5500]).astype(np.float), 
+                      500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750,
+                      2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500]).astype(np.float64), 
             dims=('depth',),
         )
 
@@ -174,7 +175,8 @@ def _gen_v1_dataset(clobber=True):
         for v in ds.data_vars:
             if v in attrs:
                 ds[v].attrs = attrs[v]
-                
+        
+        ds['area'] = compute_grid_area(ds)                
         ds.to_netcdf(netcdf_file)
         return ds
 
@@ -194,7 +196,20 @@ def open_glodap(product='GLODAPv1'):
         ds = xr.merge(ds_list)
         ds = ds.rename({'Depth': 'depth'})
         ds = ds.rename({'depth_surface': 'depth'}).set_coords('depth')
-        ds = ds.rename({'TAlk': 'ALK', 'TCO2': 'DIC', 'oxygen': 'O2',})            
+        ds = ds.rename({'TAlk': 'ALK', 'TCO2': 'DIC', 'oxygen': 'O2',})
+        ds['area'] = compute_grid_area(ds)
+        ds['depth_edges'] = xr.DataArray(
+            np.array([0, 5, 15, 25, 40, 60, 85, 110, 135, 175, 
+                      225, 275, 350, 450, 550, 650, 750, 850, 950, 
+                       1050, 1150, 1250, 1350, 1450, 1600, 1850, 2250, 
+                       2750, 3250, 3750, 4250, 4750, 5250, 6500]).astype(np.float64), 
+            dims=('depth_edges',),
+        )
+        
+        edges = (ds.depth.values[:-1] + ds.depth.values[1:]) / 2.
+        ds['depth_edges'] = xr.DataArray(
+                np.concatenate(([0.], edges, [6500.])), dims=('depth_edges')
+        )
         return ds
     
 
@@ -236,7 +251,7 @@ def add_coords_regrid_vertical(ds_dst_xy, pop_grid='POP_gx1v7'):
     
     ds_dst_xy = ds_dst_xy.assign_coords({zdim: ds_dst_xy[zdim] * 1e2}) # m --> cm
     
-    grid_vars = ['TLONG', 'TLAT', 'TAREA', 'z_t', 'dz', 'KMT']
+    grid_vars = ['TLONG', 'TLAT', 'TAREA', 'z_t', 'dz', 'KMT', 'dz']
     ds_pop = pop_tools.get_grid(pop_grid)
     ds_dst = ds_pop[grid_vars].set_coords(grid_vars)
         
@@ -262,3 +277,58 @@ def add_coords_regrid_vertical(ds_dst_xy, pop_grid='POP_gx1v7'):
         ds_dst[v].encoding['_FillValue'] = None
         
     return ds_dst.drop([zdim]).rename({ydim: 'nlat', xdim: 'nlon'})    
+
+
+def lat_weights_regular_grid(lat):
+    """
+    Generate latitude weights for equally spaced (regular) global grids.
+    Weights are computed as sin(lat+dlat/2)-sin(lat-dlat/2) and sum to 2.0.
+    """   
+    dlat = np.abs(np.diff(lat))
+    np.testing.assert_almost_equal(dlat, dlat[0])
+    w = np.abs(np.sin(np.radians(lat + dlat[0] / 2.)) - np.sin(np.radians(lat - dlat[0] / 2.)))
+
+    if np.abs(lat[0]) > 89.9999: 
+        w[0] = np.abs(1. - np.sin(np.radians(np.pi / 2 - dlat[0])))
+
+    if np.abs(lat[-1]) > 89.9999:
+        w[-1] = np.abs(1. - np.sin(np.radians(np.pi / 2 - dlat[0])))
+
+    return w
+
+
+def compute_grid_area(ds, check_total=True):
+    """Compute the area of grid cells.
+    
+    Parameters
+    ----------
+    
+    ds : xarray.Dataset
+      Input dataset with latitude and longitude fields
+    
+    check_total : Boolean, optional
+      Test that total area is equal to area of the sphere.
+      
+    Returns
+    -------
+    
+    area : xarray.DataArray
+       DataArray with area field.
+    
+    """
+    
+    radius_earth = 6.37122e6 # m, radius of Earth
+    area_earth = 4.0 * np.pi * radius_earth**2 # area of earth [m^2]e
+    
+    lon_name = 'lon'
+    lat_name = 'lat'
+    
+    weights = lat_weights_regular_grid(ds[lat_name])
+    area = weights + 0.0 * ds[lon_name] # add 'lon' dimension
+    area = (area_earth / area.sum(dim=(lat_name, lon_name))) * area
+    
+    if check_total:
+        np.testing.assert_approx_equal(np.sum(area), area_earth)
+        
+    return xr.DataArray(area, dims=(lat_name, lon_name), attrs={'units': 'm^2', 'long_name': 'area'})  
+
