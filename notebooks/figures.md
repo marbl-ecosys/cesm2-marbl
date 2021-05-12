@@ -74,6 +74,22 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 [//]: # (AUTO-GENERATED CONTENT BELOW)
 
+### Mixed layer depth
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/mld-maps-125.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### Mixed layer depth (alt)
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/mld-maps-003.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
 ### Ventilation biases: C<sub>ant</sub>
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/za-obs-comparison-Cant.png" 
@@ -117,14 +133,6 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 ### MOC
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/moc.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### Mixed layer depth
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/mld-maps.png" 
      style="background:none; border:none; box-shadow:none;" 
      width=1000px>
 
