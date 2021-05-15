@@ -1,0 +1,12 @@
+sources:
+  Cant_Gruber2019:
+    driver: netcdf
+    description: 'The oceanic sink for anthropogenic CO2 from 1994 to 2007 - the data (NCEI Accession 0186034)'
+    args:
+      urlpath: simplecache::https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0186034/dcant_emlr_cstar_gruber_94-07_vs1.nc
+      xarray_kwargs:
+        decode_times: true
+      chunks: {}
+      storage_options:
+        simplecache:
+          same_names: true

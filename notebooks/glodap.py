@@ -3,6 +3,9 @@ from glob import glob
 
 import numpy as np
 import xarray as xr
+
+import intake
+
 import urllib
 import netCDF4 as nc
 
@@ -17,8 +20,22 @@ cache_dir = f'/glade/p/cgd/oce/projects/cesm2-marbl/glodap-data'
 known_products = [
     'GLODAPv1',
     'GLODAPv2.2016b_MappedClimatologies',
+    'GLODAPv1+Gruber2019',
     # 'GLODAPv2_Mapped_Climatologies', # this appears to be on pressure surfaces
 ]
+
+depth_bnds = xr.DataArray(
+    np.array([
+        [-5.0, 5.0], [5.0, 15.0], [15.0, 25.0], [25.0, 40.0], [40.0, 62.5], 
+        [62.5, 87.5], [87.5, 112.5], [112.5, 137.5], [137.5, 175.0], 
+        [175.0, 225.0], [225.0, 275.0], [275.0, 350.0], [350.0, 450.0], 
+        [450.0, 550.0], [550.0, 650.0], [650.0, 750.0], [750.0, 850.0], 
+        [850.0, 950.0], [950.0, 1050.0], [1050.0, 1150.0], [1150.0, 1250.0], 
+        [1250.0, 1350.0], [1350.0, 1450.0], [1450.0, 1625.0], [1625.0, 1875.0], 
+        [1875.0, 2250.0], [2250.0, 2750.0], [2750.0, 3250.0], [3250.0, 3750.0],
+        [3750.0, 4250.0], [4250.0, 4750.0], [4750.0, 5250.0], [5250.0, 5750.0]]), 
+    dims=('depth', 'bnds'), 
+)
 
 
 def _ensure_datafiles(product_name='GLODAPv2.2016b_MappedClimatologies'):
@@ -110,16 +127,8 @@ def _gen_v1_dataset(clobber=False):
             Del14C=dict(long_name='$^{14}$C', units='permille'),                        
         )
         
-        depth_edges = xr.DataArray(
-            np.array([0, 5, 15, 25, 40, 60, 85, 110, 135, 175, 
-                      225, 275, 350, 450, 550, 650, 750, 850, 950, 
-                       1050, 1150, 1250, 1350, 1450, 1600, 1850, 2250, 
-                       2750, 3250, 3750, 4250, 4750, 5250, 6500]).astype(np.float64), 
-            dims=('depth_edges',),
-        )
-
         depth = xr.DataArray(
-            np.array([0, 10, 20, 30, 50, 75, 100, 125, 150, 200,250,300,400,
+            np.array([0, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400,
                       500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1750,
                       2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500]).astype(np.float64), 
             dims=('depth',),
@@ -134,7 +143,8 @@ def _gen_v1_dataset(clobber=False):
             lon=lon,
             lat=lat,
             depth=depth,
-            depth_edges=depth_edges,
+            depth_bnds=depth_bnds,
+            dz=depth_bnds.diff('bnds').squeeze(),
         ))
 
         def convert_str(string):
@@ -176,9 +186,35 @@ def _gen_v1_dataset(clobber=False):
             if v in attrs:
                 ds[v].attrs = attrs[v]
         
-        ds['area'] = compute_grid_area(ds)                
+        ds['area'] = compute_grid_area(ds)
         ds.to_netcdf(netcdf_file)
         return ds
+
+
+def _gen_Gruber2019_dataset():
+    """Return dataset from Gruber et al. 2019
+    The oceanic sink for anthropogenic CO2 from 1994 to 2007
+    https://www.ncei.noaa.gov/access/ocean-carbon-data-system/oceans/ndp_100/ndp100.html
+    """
+    cat = intake.open_catalog('catalogs/Cant_Gruber2019.yml')
+    ds = cat.Cant_Gruber2019().to_dask()
+    ds = ds.rename(
+        {'LONGITUDE': 'lon', 
+         'LATITUDE': 'lat', 
+         'DEPTH': 'depth',
+         'DEPTH_bnds': 'depth_bnds',
+        }
+    )
+    ds['dz'] = ds.depth_bnds.diff('bnds').squeeze()
+    ds['area'] = compute_grid_area(ds)
+    
+    # rearrange longitude to match GLODAPv1
+    ndx0 = np.where(ds.lon > 180.)[0]
+    ndx1 = np.where(ds.lon < 180.)[0]
+    ds = xr.concat((ds.isel(lon=ndx0), ds.isel(lon=ndx1)), dim='lon')
+    ds['lon'] = xr.where(ds.lon > 180., ds.lon - 360., ds.lon)
+
+    return ds[['DCANT_01']].compute()
 
 
 def open_glodap(product='GLODAPv1'):
@@ -186,6 +222,10 @@ def open_glodap(product='GLODAPv1'):
     assert product in known_products
     if product == 'GLODAPv1':
         return _gen_v1_dataset()
+    elif product == 'GLODAPv1+Gruber2019':
+        ds = _gen_v1_dataset()
+        ds['Cant_v1pGruber2019'] = ds.Cant_v1 + _gen_Gruber2019_dataset()['DCANT_01']        
+        return ds[['Cant_v1pGruber2019', 'dz', 'area']]
     else:
         obs_files = _ensure_datafiles(product)
         ds_list = []
@@ -198,18 +238,8 @@ def open_glodap(product='GLODAPv1'):
         ds = ds.rename({'depth_surface': 'depth'}).set_coords('depth')
         ds = ds.rename({'TAlk': 'ALK', 'TCO2': 'DIC', 'oxygen': 'O2',})
         ds['area'] = compute_grid_area(ds)
-        ds['depth_edges'] = xr.DataArray(
-            np.array([0, 5, 15, 25, 40, 60, 85, 110, 135, 175, 
-                      225, 275, 350, 450, 550, 650, 750, 850, 950, 
-                       1050, 1150, 1250, 1350, 1450, 1600, 1850, 2250, 
-                       2750, 3250, 3750, 4250, 4750, 5250, 6500]).astype(np.float64), 
-            dims=('depth_edges',),
-        )
-        
-        edges = (ds.depth.values[:-1] + ds.depth.values[1:]) / 2.
-        ds['depth_edges'] = xr.DataArray(
-                np.concatenate(([0.], edges, [6500.])), dims=('depth_edges')
-        )
+        ds['depth_bnds'] = depth_bnds
+        ds['dz'] = depth_bnds.diff('bnds').squeeze()        
         return ds
     
 
@@ -220,7 +250,7 @@ def open_glodap_pop_grid(product='GLODAPv1', model_grid='POP_gx1v7', method='bil
     ds_src = open_glodap(product)
     dst_grid = regrid_tools.grid(model_grid, clobber=False)
     
-    if product == 'GLODAPv1':
+    if 'GLODAPv1' in product:
         src_grid = regrid_tools.grid('latlon_glodapv1', nx=360, ny=180, lon0=-180.)#, grid_imask=grid_imask)
     else:
         src_grid = regrid_tools.grid('latlon_glodapv2', nx=360, ny=180, lon0=20.5)#, grid_imask=grid_imask)

@@ -33,9 +33,9 @@ def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
 
     if is_derived:
         dset = dv.compute(dset)
-        if variable == 'Cant_v1':
-            dset = dset.rename({'Cant': 'Cant_v1'})
-            
+        if variable in ['Cant_v1', 'Cant_v1pGruber2019']:
+            dset = dset.rename({'Cant': variable})
+        
     if mean_dims is not None:
         with xr.set_options(keep_attrs=True):
             dset = dset.mean(dim=mean_dims)
@@ -419,6 +419,10 @@ derived_vars_defined = dict(
         dependent_vars=['DIC', 'DIC_ALT_CO2'],
         method=derive_var_Cant,        
     ),    
+    Cant_v1pGruber2019=dict(
+        dependent_vars=['DIC', 'DIC_ALT_CO2'],
+        method=derive_var_Cant,            
+    ),
     Del14C=dict(
         dependent_vars=['ABIO_DIC14', 'ABIO_DIC'],
         method=derive_var_Del14C,        

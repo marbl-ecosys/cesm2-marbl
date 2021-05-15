@@ -3,6 +3,7 @@ channels:
 - conda-forge
 - defaults
 dependencies:
+- aiohttp
 - bokeh==1.4
 - bottleneck
 - cartopy
@@ -14,8 +15,10 @@ dependencies:
 - dask-jobqueue==0.7.1
 - dask-mpi
 - esmpy
+- fsspec
 - intake
-- intake-esm 
+- intake-esm
+- intake-xarray
 - ipywidgets
 - jupyter_contrib_nbextensions
 - jupyterlab

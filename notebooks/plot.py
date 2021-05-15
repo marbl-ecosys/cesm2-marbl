@@ -9,10 +9,11 @@ import cmocean
 
 import utils
 
-
+# this is really lame
 long_name = dict(
     Cant='C$_{ant}$',
-    Cant_v1='C$_{ant}$',    
+    Cant_v1='C$_{ant}$',
+    Cant_v1pGruber2019='C$_{ant}$',
     pCFC11='pCFC-11',
     pCFC12='pCFC-12',    
     Del14C='$\Delta^{14}$C',
@@ -25,7 +26,8 @@ long_name = dict(
 )
 units = dict(
     Cant='mmol m$^{-3}$',
-    Cant_v1='mmol m$^{-3}$',    
+    Cant_v1='mmol m$^{-3}$',
+    Cant_v1pGruber2019='mmol m$^{-3}$',    
     pCFC11='patm',
     pCFC12='patm',
     Del14C='‰',    
