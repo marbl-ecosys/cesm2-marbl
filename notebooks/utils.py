@@ -119,11 +119,14 @@ def zonal_mean_via_fortran(ds, var=None, grid=None, region_mask=None, replace_km
     proc = subprocess.Popen(za_call, stdout=subprocess.PIPE)
     (out, err) = proc.communicate()
 
+    subprocess.check_call(['cp', '-v', ds_in_file.name, f'{os.environ["TMPDIR"]}/za-in.nc'])
+    subprocess.check_call(['cp', '-v', grid_file_name, f'{os.environ["TMPDIR"]}/za-grid.nc'])
+    subprocess.check_call(['cp', '-v', rmask_file.name, f'{os.environ["TMPDIR"]}/za-rmask.nc'])        
+    
     if not out:
         # Read in the newly-generated file
         print('za ran successfully, writing netcdf output')
         ds_out = xr.open_dataset(ds_out_file.name)
-        subprocess.check_call(['cp', '-v', ds_out_file.name, '/glade/scratch/mclong/junk3.nc'])
     else:
         print(f'za reported an error:\n{out.decode("utf-8")}')
         print(za_call)
@@ -204,8 +207,10 @@ def pop_add_cyclic(ds):
             
     return dso
 
-def label_plots(fig, axs, xoff=-0.04, yoff=0.02):
-    alp = [chr(i).upper() for i in range(97,97+26)]
+def label_plots(fig, axs, xoff=-0.04, yoff=0.02, start=0):
+    
+    alp = [chr(i).upper() for i in range(97,97+26)][start:]
+    
     for i, ax in enumerate(axs):    
         p = ax.get_position()
         x = p.x0 + xoff

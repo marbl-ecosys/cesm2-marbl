@@ -1,0 +1,13 @@
+sources:
+  fgco2_MPI_SOM_FFN:
+    driver: netcdf
+    description: 'An observation-based global monthly gridded sea surface pCO2 product from 1982 onward and its monthly climatology'
+    args:
+      urlpath: simplecache::https://www.nodc.noaa.gov/archive/arc0105/0160558/4.4/data/0-data/MPI_SOM-FFN_v2018/spco2_MPI_SOM-FFN_v2018.nc
+      xarray_kwargs:
+        decode_times: true
+        drop_variables: date
+      chunks: {}
+      storage_options:
+        simplecache:
+          same_names: true

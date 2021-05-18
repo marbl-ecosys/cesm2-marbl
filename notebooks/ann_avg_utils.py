@@ -109,7 +109,8 @@ def global_vars():
                         'diaz_Nfix', 'NOx_FLUX', 'NHy_FLUX', 'NHx_SURFACE_EMIS',
                         'DENITRIF', 'SedDenitrif', 'DON_RIV_FLUX', 'DONr_RIV_FLUX',
                         'NO3_RIV_FLUX', 'ponToSed', 'FG_CO2', 'O2' ,
-                        'O2_under_thres' # add a thres dimension corresponding to limits
+                        'O2_under_thres', # add a thres dimension corresponding to limits
+                        'ATM_CO2',
                        ]
 
     # experiments is a list of experiments to compute values for

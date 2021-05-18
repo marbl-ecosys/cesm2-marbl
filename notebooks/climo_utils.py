@@ -36,12 +36,12 @@ def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
         if variable in ['Cant_v1', 'Cant_v1pGruber2019']:
             dset = dset.rename({'Cant': variable})
         
+    if postprocess is not None:
+        dset = postprocess(dset)
+        
     if mean_dims is not None:
         with xr.set_options(keep_attrs=True):
             dset = dset.mean(dim=mean_dims)
-    
-    if postprocess is not None:
-        dset = postprocess(dset)
         
     for v in dset.variables:
         if '_FillValue' not in dset[v].encoding:
