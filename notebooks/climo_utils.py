@@ -1,4 +1,8 @@
-def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
+def read_CESM_var(time_slice, variable, 
+                  mean_dims=None, 
+                  postprocess=None, 
+                  postprocess_kwargs={}, 
+                  experiment='historical',):
     import intake
     import intake_esm
     import xarray as xr
@@ -16,7 +20,7 @@ def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
     )
 
     dq = (catalog
-          .search(experiment='historical', 
+          .search(experiment=experiment, 
                   component='ocn', 
                   variable=varlist
                  )
@@ -28,8 +32,11 @@ def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
                  'TLAT', 'time', 'time_bound', 'member_id', 
                  'ctrl_member_id',] + varlist
 
-    dset = dq['ocn.historical.pop.h']
-    dset = dset[[v for v in keep_vars if v in dset]].sel(time=time_slice)
+    dset = dq[f'ocn.{experiment}.pop.h']
+    dset = dset[[v for v in keep_vars if v in dset]]
+    
+    if time_slice is not None:
+        dset = dset.sel(time=time_slice)
 
     if is_derived:
         dset = dv.compute(dset)
@@ -37,7 +44,7 @@ def read_CESM_var(time_slice, variable, mean_dims=None, postprocess=None):
             dset = dset.rename({'Cant': variable})
         
     if postprocess is not None:
-        dset = postprocess(dset)
+        dset = postprocess(dset, **postprocess_kwargs)
         
     if mean_dims is not None:
         with xr.set_options(keep_attrs=True):
@@ -401,6 +408,19 @@ def derive_var_Del14C(ds, drop_derivedfrom_vars=True):
 
     return ds     
 
+def derive_var_SST(ds, drop_derivedfrom_vars=True):
+    """compute STT"""
+
+    ds['SST'] = ds['TEMP'].isel(z_t=0, drop=True)
+    ds.SST.attrs = ds.TEMP.attrs
+    ds.SST.attrs['long_name'] = 'SST'
+    ds.SST.encoding = ds.TEMP.encoding
+
+    if drop_derivedfrom_vars:
+        ds = ds.drop(['TEMP'])
+
+    return ds    
+
 
 derived_vars_defined = dict(
     pCFC11=dict(
@@ -426,7 +446,11 @@ derived_vars_defined = dict(
     Del14C=dict(
         dependent_vars=['ABIO_DIC14', 'ABIO_DIC'],
         method=derive_var_Del14C,        
-    ),        
+    ), 
+    SST=dict(
+        dependent_vars=['TEMP'],
+        method=derive_var_SST,        
+    ),    
 )
 class derived_var(object):      
     def __init__(self, varname):
