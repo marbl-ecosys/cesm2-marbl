@@ -3,8 +3,10 @@
         "nlat",
         "nlon"
     ],
-    "coordinates": "TLONG TLAT",
+    "cell_methods": "time: mean",
+    "coordinates": "TLAT TLONG",
+    "grid_loc": "3114",
     "long_name": "Nitrogen fixation",
-    "title_str": "Nitrogen fixation (241.2 Tg N yr$^{-1}$)",
+    "title_str": "Nitrogen fixation (243.2 Tg N yr$^{-1}$)",
     "units": "mmol m$^{-2}$ yr$^{-1}$"
 }

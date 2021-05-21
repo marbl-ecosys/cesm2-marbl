@@ -3,8 +3,8 @@
         "nlat",
         "nlon"
     ],
-    "coordinates": "TLONG TLAT",
+    "coordinates": "TLAT TLONG",
     "long_name": "Denitrification",
-    "title_str": "Denitrification (193.1 Tg N yr$^{-1}$)",
+    "title_str": "Denitrification (191.9 Tg N yr$^{-1}$)",
     "units": "mmol m$^{-2}$ yr$^{-1}$"
 }
