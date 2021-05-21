@@ -109,3 +109,4 @@ docs/_build
 .vscode/
 notes/
 dask-worker.*
+PET0.RegridWeightGen.Log

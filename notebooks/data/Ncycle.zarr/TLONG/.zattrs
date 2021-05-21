@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "nlat",
+        "nlon"
+    ],
+    "long_name": "array of t-grid longitudes",
+    "missing_value": 9.969209968386869e+36,
+    "units": "degrees_east"
+}

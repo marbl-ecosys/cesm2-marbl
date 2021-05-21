@@ -1,0 +1,12 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "member_id",
+        "nlat",
+        "nlon"
+    ],
+    "cell_methods": "time: mean",
+    "coordinates": "TLONG DYU REGION_MASK TAREA ULONG KMT UAREA DYT ULAT DXU TLAT DXT",
+    "grid_loc": "2110",
+    "long_name": "POC Flux at 100m",
+    "units": "nmol/cm^2/s"
+}

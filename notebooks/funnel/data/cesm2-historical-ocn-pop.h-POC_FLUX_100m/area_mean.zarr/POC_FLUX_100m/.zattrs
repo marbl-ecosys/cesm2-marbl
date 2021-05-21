@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "member_id",
+        "time"
+    ],
+    "cell_methods": "time: mean",
+    "coordinates": "TLONG TLAT time",
+    "grid_loc": "2110",
+    "long_name": "POC Flux at 100m",
+    "units": "nmol/cm^2/s"
+}

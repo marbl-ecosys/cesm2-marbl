@@ -7,7 +7,7 @@ data_sources:
         loc_type: posix
         direct_access: True
         urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
-        exclude_dirs: ['*.nc_temp_.nc']
+        exclude_dirs: ['*.nc_temp_.nc', '*.120001-120012*', '*.GOOD*']
     extra_attributes:
       component_attrs:
         ocn:
@@ -151,19 +151,24 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        #urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        urlpath: /glade/collections/cdg/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
         ocn:
           grid: POP_gx1v7
       case_members:
-        - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.001
+        - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.101
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
-        - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.002
-          ctrl_member_id: 1
+        - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.102
+          ctrl_member_id: 11
+          ctrl_experiment: historical
+          ctrl_branch_year: 2015
+        - case: b.e21.BSSP126cmip6.f09_g17.CMIP6-SSP1-2.6.103
+          ctrl_member_id: 4
           ctrl_experiment: historical
           ctrl_branch_year: 2015
 
@@ -172,23 +177,24 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        #urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        urlpath: /glade/collections/cdg/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
         ocn:
           grid: POP_gx1v7
       case_members:
-        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.001
+        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.101
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
-        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.002
+        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.102
           ctrl_member_id: 11
           ctrl_experiment: historical
           ctrl_branch_year: 2015
-        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.003
-          ctrl_member_id: 1
+        - case: b.e21.BSSP245cmip6.f09_g17.CMIP6-SSP2-4.5.103
+          ctrl_member_id: 4
           ctrl_experiment: historical
           ctrl_branch_year: 2015
 
@@ -197,19 +203,24 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        #urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        urlpath: /glade/collections/cdg/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
         ocn:
           grid: POP_gx1v7
       case_members:
-        - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.001
+        - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.101
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
-        - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.002
+        - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.102
           ctrl_member_id: 11
+          ctrl_experiment: historical
+          ctrl_branch_year: 2015
+        - case: b.e21.BSSP370cmip6.f09_g17.CMIP6-SSP3-7.0.103
+          ctrl_member_id: 4
           ctrl_experiment: historical
           ctrl_branch_year: 2015
 
@@ -218,19 +229,24 @@ data_sources:
       - name: glade
         loc_type: posix
         direct_access: True
-        urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        #urlpath: /glade/campaign/collections/cmip/CMIP6/timeseries-cmip6
+        urlpath: /glade/collections/cdg/timeseries-cmip6
         exclude_dirs: ['*.nc_temp_.nc']
     extra_attributes:
       component_attrs:
         ocn:
           grid: POP_gx1v7
       case_members:
-        - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.001
+        - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.101
           ctrl_member_id: 10
           ctrl_experiment: historical
           ctrl_branch_year: 2015
-        - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.002
+        - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.102
           ctrl_member_id: 11
+          ctrl_experiment: historical
+          ctrl_branch_year: 2015
+        - case: b.e21.BSSP585cmip6.f09_g17.CMIP6-SSP5-8.5.103
+          ctrl_member_id: 4
           ctrl_experiment: historical
           ctrl_branch_year: 2015
 

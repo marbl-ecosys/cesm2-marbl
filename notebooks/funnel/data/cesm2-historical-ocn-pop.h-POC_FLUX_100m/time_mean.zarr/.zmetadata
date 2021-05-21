@@ -1,0 +1,604 @@
+{
+    "metadata": {
+        ".zattrs": {
+            "coordinates": "dz dz_150m"
+        },
+        ".zgroup": {
+            "zarr_format": 2
+        },
+        "DXT/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "DXT/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "TLONG TLAT",
+            "long_name": "x-spacing centered at T points",
+            "units": "cm"
+        },
+        "DXU/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "DXU/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "ULONG ULAT",
+            "long_name": "x-spacing centered at U points",
+            "units": "cm"
+        },
+        "DYT/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "DYT/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "TLONG TLAT",
+            "long_name": "y-spacing centered at T points",
+            "units": "cm"
+        },
+        "DYU/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "DYU/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "ULONG ULAT",
+            "long_name": "y-spacing centered at U points",
+            "units": "cm"
+        },
+        "KMT/.zarray": {
+            "chunks": [
+                192,
+                320
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<i4",
+            "fill_value": null,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "KMT/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "TLONG TLAT",
+            "long_name": "k Index of Deepest Grid Cell on T Grid"
+        },
+        "POC_FLUX_100m/.zarray": {
+            "chunks": [
+                1,
+                384,
+                320
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                11,
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "POC_FLUX_100m/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "member_id",
+                "nlat",
+                "nlon"
+            ],
+            "cell_methods": "time: mean",
+            "coordinates": "TLONG DYU REGION_MASK TAREA ULONG KMT UAREA DYT ULAT DXU TLAT DXT",
+            "grid_loc": "2110",
+            "long_name": "POC Flux at 100m",
+            "units": "nmol/cm^2/s"
+        },
+        "REGION_MASK/.zarray": {
+            "chunks": [
+                192,
+                320
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<i4",
+            "fill_value": null,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "REGION_MASK/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "TLONG TLAT",
+            "long_name": "basin index number (signed integers)"
+        },
+        "TAREA/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "TAREA/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "TLONG TLAT",
+            "long_name": "area of T cells",
+            "units": "cm^2"
+        },
+        "TLAT/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "TLAT/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "long_name": "T-grid latitude",
+            "units": "degrees_north"
+        },
+        "TLONG/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "TLONG/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "long_name": "T-grid longitude",
+            "units": "degrees_east"
+        },
+        "UAREA/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "UAREA/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "coordinates": "ULONG ULAT",
+            "long_name": "area of U cells",
+            "units": "cm^2"
+        },
+        "ULAT/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "ULAT/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "long_name": "U-grid latitude",
+            "units": "degrees_north"
+        },
+        "ULONG/.zarray": {
+            "chunks": [
+                192,
+                160
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                384,
+                320
+            ],
+            "zarr_format": 2
+        },
+        "ULONG/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "nlat",
+                "nlon"
+            ],
+            "long_name": "U-grid longitude",
+            "units": "degrees_east"
+        },
+        "dz/.zarray": {
+            "chunks": [
+                60
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                60
+            ],
+            "zarr_format": 2
+        },
+        "dz/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_t"
+            ],
+            "long_name": "thickness of layer k",
+            "units": "cm"
+        },
+        "dz_150m/.zarray": {
+            "chunks": [
+                15
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                15
+            ],
+            "zarr_format": 2
+        },
+        "dz_150m/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_t_150m"
+            ],
+            "long_name": "thickness of layer k",
+            "units": "cm"
+        },
+        "member_id/.zarray": {
+            "chunks": [
+                11
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<i8",
+            "fill_value": null,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                11
+            ],
+            "zarr_format": 2
+        },
+        "member_id/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "member_id"
+            ]
+        },
+        "z_t/.zarray": {
+            "chunks": [
+                60
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                60
+            ],
+            "zarr_format": 2
+        },
+        "z_t/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_t"
+            ],
+            "long_name": "depth from surface to midpoint of layer",
+            "positive": "down",
+            "units": "cm"
+        },
+        "z_t_150m/.zarray": {
+            "chunks": [
+                15
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                15
+            ],
+            "zarr_format": 2
+        },
+        "z_t_150m/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_t_150m"
+            ],
+            "long_name": "depth from surface to midpoint of layer",
+            "positive": "down",
+            "units": "cm"
+        },
+        "z_w/.zarray": {
+            "chunks": [
+                60
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                60
+            ],
+            "zarr_format": 2
+        },
+        "z_w/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_w"
+            ],
+            "long_name": "depth from surface to top of layer",
+            "positive": "down",
+            "units": "cm"
+        },
+        "z_w_bot/.zarray": {
+            "chunks": [
+                60
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                60
+            ],
+            "zarr_format": 2
+        },
+        "z_w_bot/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "z_w_bot"
+            ],
+            "long_name": "depth from surface to bottom of layer",
+            "positive": "down",
+            "units": "cm"
+        }
+    },
+    "zarr_consolidated_format": 1
+}

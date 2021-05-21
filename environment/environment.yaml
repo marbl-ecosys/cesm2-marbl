@@ -1,0 +1,55 @@
+name: cesm2-marbl
+channels:
+- conda-forge
+- defaults
+dependencies:
+- aiohttp
+- bokeh==1.4
+- bottleneck
+- cartopy
+- cf_units
+- cftime=1.0.3.4
+- cmocean
+- dask==2.14
+- distributed==2.14
+- dask-jobqueue==0.7.1
+- dask-mpi
+- esmpy
+- fsspec
+- intake
+- intake-esm
+- intake-xarray
+- ipywidgets
+- jupyter_contrib_nbextensions
+- jupyterlab
+- matplotlib
+- nc-time-axis
+- ncar-jobqueue
+- netcdf4
+- numba
+- numpy
+- pandas
+- pint
+- pip
+- pop-tools
+- pytest
+- python=3.7
+- scipy
+- seaborn
+- seawater
+- statsmodels
+- tabulate
+- toolz
+- tqdm
+- watermark
+- xarray
+- xesmf #=0.1.1
+- xgcm
+- xhistogram
+- xrft
+- zarr
+- pip:
+  - git+https://github.com/NCAR/esmlab.git
+  - git+https://github.com/NCAR/esmlab-regrid.git
+  - git+https://github.com/NCAR/xpersist.git
+  
