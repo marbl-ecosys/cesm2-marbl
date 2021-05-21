@@ -165,15 +165,15 @@ Parameters :
         description_suffix : for diazotrophs
     grazing_relationship_settings(1,1)%graze_zoo :
         label : $\gamma_\mathrm{sp}$
-        description : assimilation coefficient for grazing
+        description : Gross growth efficiency coefficient for grazing
         description_suffix : for small phytoplankton
     grazing_relationship_settings(2,1)%graze_zoo :
         label : $\gamma_\mathrm{diat}$
-        description : assimilation coefficient for grazing
+        description : Gross growth efficiency coefficient for grazing
         description_suffix : for diatoms
     grazing_relationship_settings(3,1)%graze_zoo :
         label : $\gamma_\mathrm{diaz}$
-        description : assimilation coefficient for grazing
+        description : Gross growth efficiency coefficient for grazing
         description_suffix : for diazotrophs
     zooplankton_settings(1)%z_mort_0_per_day :
         label : $m_Z$
