@@ -1,0 +1,16 @@
+asset: /glade/scratch/mclong/tmp/6305e9a70f1ab8caf9b2ed3f4f080333.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.SSP5-8.5.pop.h
+operator_kwargs:
+- normalize: false
+- {}
+operators:
+- global_mean
+- resample_ann
+preprocess: null
+query:
+  experiment:
+  - historical
+  - SSP5-8.5
+  stream: pop.h
+variable: FG_CO2

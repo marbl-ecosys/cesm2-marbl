@@ -110,3 +110,4 @@ docs/_build
 notes/
 dask-worker.*
 PET0.RegridWeightGen.Log
+notebooks/heap/*

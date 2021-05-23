@@ -1,9 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "nlat",
-        "nlon"
-    ],
-    "coordinates": "TLONG TLAT",
-    "long_name": "y-spacing centered at T points",
-    "units": "cm"
-}

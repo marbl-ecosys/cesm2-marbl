@@ -1,0 +1,1 @@
+_DERIVED_VAR_REGISTRY = dict()

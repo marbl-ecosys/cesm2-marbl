@@ -1,9 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "nlat",
-        "nlon"
-    ],
-    "coordinates": "TLONG TLAT",
-    "long_name": "area of T cells",
-    "units": "cm^2"
-}

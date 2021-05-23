@@ -1,9 +1,0 @@
-{
-    "_ARRAY_DIMENSIONS": [
-        "nlat",
-        "nlon"
-    ],
-    "coordinates": "ULONG ULAT",
-    "long_name": "area of U cells",
-    "units": "cm^2"
-}

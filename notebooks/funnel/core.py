@@ -1,295 +1,318 @@
 import os
+from glob import glob
 import shutil
 
-import pickle
-from toolz import curry
+import warnings
+import json 
+import yaml
+
+import intake
 
 import dask
 import xarray as xr
-import xpersist as xp
 
-import intake
-import intake_esm
+from toolz import curry
 
-from . config import path_to_here, project_tmpdir, cache_database_file
-from . import units
-from . import util
-from . import pop
+from . config import cache_catalog_dir, cache_catalog_prefix
+from . registry import _DERIVED_VAR_REGISTRY
+
+os.makedirs(cache_catalog_dir, exist_ok=True)
 
 
-class Component(object):
-    """A class to enable provenance tracking"""
-    
-    def __init__(
-        self, 
-        model, 
-        experiment, 
-        variable,
-        component='ocn', 
-        stream='pop.h',
-        cache_path=None,        
-        cache_format='zarr',
-        cdf_kwargs=None,
-        **kwargs,
-    ):
-        # TODO: add support beyond POP        
-        assert component == 'ocn'
-        
-        # TODO: determine the right catalog file
-        self.model = model
-        self.catalog_file = f'{path_to_here}/catalogs/campaign-cesm2-cmip6-timeseries.json'        
-        
-        # TODO: construct a name for this that can track catalog/query
-        self.name = '-'.join([
-            model,
-            experiment,
-            component,
-            stream,
-            variable,
-        ])
-        
-        if cache_path is None:
-            self.cache_path = project_tmpdir
-        else:
-            self.cache_path = cache_path
-        self.cache_format = cache_format
-        
-        if cdf_kwargs is None:
-            self.cdf_kwargs = dict(
-                chunks=dict(time=180),
-                decode_coords=False,
-                decode_times=False,
-            )
-        
-        # apply the query and get a dataset
-        catalog = intake.open_esm_datastore(self.catalog_file, sep=':')
-
-        if not isinstance(variable, list):
-            variable = [variable]
-
-        self.data_vars = variable
-            
-        # manage derived variables
-        query_variables, derived_variables = manage_var_dep(
-            variable_list=variable,
-            defined_model_variables=list(catalog.df.variable.unique()),
-        )
-        
-        self._derived_var_func = None
-        if derived_variables:
-            self._derived_var_func = defined_derived_variables[variable]['function']
-        
-        # set the query
-        self.query = dict(
-            experiment=experiment,
-            component=component,
-            stream=stream,
-            variable=query_variables,
-        )               
-        self.catalog = catalog.search(**self.query)   
-        self._ds_key = ':'.join([component, experiment, stream])
-        self._ds = None
-
-    def __repr__(self):
-        """return string representation of object"""
-        return (f'{self.name}:\n'
-                f'  catalog: {self.catalog_file}\n'
-                f'  query: {self.query}\n'
-                f'  assets: {self.catalog}'
-               )
-    
-    @property
-    def ds(self):
-        """get a dataset from catalog and query, but only if necessary"""        
-
-        if self._ds is None:               
-            dsets = self.catalog.to_dataset_dict(cdf_kwargs=self.cdf_kwargs)
-            
-            # TODO: should we support concatentation logic?
-            assert len(dsets.keys()) == 1
-
-            ds = dsets[self._ds_key]
-
-            # TODO: need test
-            # apply derivation function
-            if self._derived_var_func is not None:
-                ds = self._derived_var_func(ds)
-                
-            # prune and conform
-            keep_vars = self.data_vars + ['time', ds.time.bounds]
-            ds = ds[keep_vars]
-            ds = util.fix_units(ds)
-            ds = util.compute_time(ds)
-            self._ds = ds.assign_coords(self._grid.variables) 
-            
-        return self._ds
-        
-    @property    
-    def _grid(self):
-        """get the grid"""        
-        # TODO: extend to other components
-        return pop.get_grid(self.model)    
-
-    @curry
-    def _persist_ds(
-        compute_func, 
-        dataset_name, 
-    ):
-        """call operator within a wrapper to persist a dataset with generated name"""
-        
-        # define the wrapper function
-        def compute_wrapper(self, **kwargs):
-            # get variables meant for local control
-            persist = kwargs.pop('persist', True)
-            clobber = kwargs.pop('clobber', False)
-
-            if persist:
-                
-                # TODO: some of this probably belongs in xpersist
-                # there should be a data registry that keeps track of the
-                # files. Files should have nominally human-readable
-                # names. The catalog, query and dask task graph 
-                # should be saved in the registry and compared 
-                # to determine if recompute is necessary. 
-                
-                # generate cache file name               
-                token = dask.base.tokenize(dataset_name, kwargs)
-                cache_name = f'{self.name}-{dataset_name}-{token}'                
-                cache_path = f'{self.cache_path}/{self.name}'
-                cache_file = f'{cache_path}/{cache_name}.{self.cache_format}'
-                cache_db_entry = {
-                    cache_file: dict(
-                        method=dataset_name,
-                        kwargs=kwargs,
-                    )
-                }                             
-                
-                # register dataset
-                cache_db = {}
-                if os.path.exists(cache_database_file):
-                    with open(cache_database_file, 'rb') as fid:
-                        cache_db = pickle.load(fid)
-
-                if cache_file in cache_db:                   
-                    # TODO: ensure that catalog/query/kwargs/task-graph match
-                    pass
-                else:
-                    cache_db.update(cache_db_entry)
-                    with open(cache_database_file, 'wb') as fid:
-                        pickle.dump(cache_db, fid)
-                
-                # I think there is a bug in xpersist            
-                if clobber and os.path.exists(cache_file):
-                    shutil.rmtree(cache_file)
-                
-                # generate xpersist partial            
-                xp_persist_ds = xp.persist_ds(
-                    name=cache_name, 
-                    path=cache_path, 
-                    trust_cache=True,
-                    format=self.cache_format,                
-                )
-                
-                # call the function
-                return xp_persist_ds(compute_func)(self, **kwargs)
-            
-            else:
-                return compute_func(self, **kwargs)
-
-        return compute_wrapper    
-    
-    @_persist_ds(dataset_name='area-mean')
-    def area_mean(self, normalize=True, region_mask_name=None):
-        """compute area-weighted average"""
-
-        # TODO: extend with region mask definitions
-        if region_mask_name is None:
-            masked_area = self.ds.TAREA.where(self.ds.REGION_MASK>0)
-        else:
-            raise NotImplemented('region mask selection not available yet')
-
-        # compute 
-        xy_vars = [
-            v for v in self.ds.data_vars 
-            if not {'nlat', 'nlon'} - set(self.ds[v].dims)
-        ]
-
-        other_vars = set(self.ds.data_vars) - set(xy_vars) 
-
-        with xr.set_options(keep_attrs=True):
-            ds_xy_mean = (self.ds[xy_vars] * masked_area).sum(['nlat', 'nlon'])
-            if normalize:
-                ds_xy_mean = ds_xy_mean / masked_area.sum(['nlat', 'nlon'])
-
-        # TODO: convert to output units                    
-        # update units
-        if not normalize:
-            for v in xy_vars:
-                ds_xy_mean[v].attrs['units'] = ' '.join([
-                    self.ds[v].attrs['units'], masked_area.units
-                ])
-
-        # copy back other variables
-        for v in other_vars:
-            ds_xy_mean[v] = self.ds[v]
-
-        # copy back coords
-        for v in self.ds.coords:
-            if {'nlat', 'nlon'} - set(self.ds[v].dims):
-                ds_xy_mean[v] = self.ds[v]
-
-        return ds_xy_mean.convert_units(self.data_vars).compute()
-
-    @_persist_ds(dataset_name='timeseries-ann')
-    def timeseries_ann(self, normalize=True, region_mask_name=None):
-        """compute an annual mean timeseries"""
-        ds_xy_mean = self.area_mean(persist=False,
-                                    normalize=normalize,                                    
-                                    region_mask_name=region_mask_name)
-        return util.calc_ann_mean(ds_xy_mean)
-    
-    @_persist_ds(dataset_name='time-mean')
-    def time_mean(self, time_slice=None):
-        """compute the time-mean"""
-        if time_slice is None:
-            ds = util.calc_time_mean(ds)
-        else:
-            ds = util.calc_time_mean(self.ds.sel(time=time_slice))
-
-        return ds.convert_units(self.data_vars).compute()
-
-    
-def manage_var_dep(variable_list, defined_model_variables):
-    """Determine if a variable is written directly by 
-       the model (and therefore just read-in)
-       or derived from dependencies.
+class Collection(object):
     """
-    query_variables = []    
-    derived_variables = []
-    for v in variable_list:    
-        if v in defined_model_variables:
-            query_variables.append(v)
-            
-        elif v in defined_derived_variables:
-            q, d = manage_var_dep(
-                defined_derived_variables[v]['dependencies']
-            )
-            derived_variables.append(v)
-            query_variables.extend(q)
-        else:    
-            raise ValueError(f'unknown variable {v}')    
+    Extend an intake-esm catalog with the ability to:
+      (1) Compute derived variables combining multipe catalog entries;
+      (2) Apply postprocessing operations to returned datasets;
+      (3) Optionally cache the results and curate a discrete catalog of processed assets; 
+          skip computation on subsequent calls for existing cataloged assets.
 
-    return (
-        sorted(list(set(query_variables))), 
-        sorted(list(set(derived_variables)))
-    )
-
-
-defined_derived_variables = {
-    'Chl_surf': {
-        'dependencies': ['diatChl', 'spChl', 'diazChl'],
-        'function': pop.compute_chl_surf,
-    },
-}
-        
+    Parameters
+    ----------
     
+    catalog : str
+      JSON file defining `intake-esm` catalog
+      
+    query : dict
+      Dictionary of keyword, value pairs defining a query subsetting the `catalog`.
+          
+    postproccess : callable, list of callables, optional
+      Call these functions on each dataset following aggregation.
+    
+    postproccess_kwargs: dict, list of dict's, optional
+       Keyword arguments to `postprocess` functions.
+       **Note** These arguments must be serializable to yaml.
+    
+    persist : bool, optional
+       Persist datasets to disk.
+       
+    cache_dir : str, optional
+       Directory for storing cache files.
+       
+    cache_format : str
+       Format in which to store cache files; can be "nc" or "zarr"
+       
+    kwargs : dict
+       Defaults for keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`.
+       (Note: these can be updated/overridden for each call to self.dsets below.)
+    """
+    def __init__(self, 
+                 esm_collection_json, 
+                 query, 
+                 postproccess=[], 
+                 postproccess_kwargs=[], 
+                 persist=False,
+                 cache_dir='.', 
+                 cache_format='nc',    
+                 **kwargs,
+                ):
+       
+        # TODO: accept multiple catalogs and concatenate them into one?
+        self.catalog = intake.open_esm_datastore(esm_collection_json).search(**query)
+    
+        self.persist = persist
+        self.cache_dir = cache_dir        
+        if self.persist and not os.path.exists(cache_dir):
+            os.makedirs(cache_dir)
+        
+        if not isinstance(postproccess, list):
+            postproccess = [postproccess]
+        self.operators = postproccess
+ 
+        if not postproccess_kwargs:
+            self.ops_kwargs = [{} for op in self.operators]
+        else:
+            if not isinstance(postproccess_kwargs, list):
+                postproccess_kwargs = [postproccess_kwargs]            
+            assert len(postproccess_kwargs) == len(postproccess), 'mismatched ops/ops_kwargs'
+            self.ops_kwargs = postproccess_kwargs
+        
+        preprocess = None if 'preprocess' not in kwargs else kwargs['preprocess'] 
+        self.name_dict = dict(
+            esm_collection=esm_collection_json, 
+            query=query, 
+            preprocess=preprocess,
+            operators=[op.__name__ for op in self.operators],
+            operator_kwargs=self.ops_kwargs,
+        )                
+        self._assemble_cache_db()
+        
+        self._format = cache_format      
+        assert self._format in ['nc', 'zarr'], f'unsupported format {cache_format}'
+        
+        self._open_cache_kwargs = {}
+        if self._format == 'zarr' and 'consolidated' not in self._open_cache_kwargs:
+            self._open_cache_kwargs['consolidated'] = True
+        
+        self._to_dsets_kwargs_defaults = kwargs
+        
+    def _assemble_cache_db(self):
+        """loop over yaml files in cache dir; find ones that match"""
+        self._cache_files = {}        
+        if not self.persist:
+            return
+        
+        cache_id_files = self._find_cache_id_files()
+        
+        if cache_id_files:
+            for file in cache_id_files:
+                with open(file, 'r') as fid:
+                    cache_id = yaml.load(fid, Loader=yaml.Loader)
+                
+                cache_name_dict = {
+                    k: cache_id[k] 
+                    for k in self.name_dict.keys()
+                    if k in cache_id
+                }
+                if cache_name_dict == self.name_dict:
+                    variable = cache_id['variable']
+                    key = cache_id['key']
+                    if variable not in self._cache_files:
+                        self._cache_files[variable] = {}                        
+                    self._cache_files[variable][key] = cache_id['asset']
+            
+    def dsets(self, variable, compute=True, clobber=False, prefer_derived=False, **kwargs):
+        """
+        Get dataset_dicts for assets.
+        
+        Parameters
+        ----------
+        
+        variable : str or list
+          The variable or list of variables to read and process.
+          
+        compute : bool, optional (default=True)
+          Specify whether to call compute on the final datasets.
+          
+        clobber : bool, optional (default=False)
+          Remove and recreate any existing cache.
+          
+        kwargs : dict, optional 
+          Keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`
+        
+        """
+                        
+        if self._cache_exists(variable, clobber):
+            return self._read_cache(variable)
+        
+        else:
+            to_dsets_kwargs = kwargs.copy()
+            to_dsets_kwargs.update(self._to_dsets_kwargs_defaults)            
+            # TODO: optionally spin up a cluster here
+            return self._generate_dsets(variable, compute, prefer_derived, **to_dsets_kwargs)
+        
+    def _generate_dsets(self, variable, compute, prefer_derived, **kwargs):
+        """Do the computation necessary to make `dsets`"""
+        
+        # check for variable in catalog
+        # TODO: we're handling empty results below: 
+        #       suppress intake-esm warning or change logic
+        catalog_subset_var = self.catalog.search(variable=variable)            
+
+        # check for variable in derived registry
+        is_derived = variable in _DERIVED_VAR_REGISTRY
+    
+        if len(catalog_subset_var):
+            if is_derived and not prefer_derived:
+                warnings.warn(
+                    f'found variable "{variable}" in catalog and derived_var registry'
+                )
+                is_derived = False                
+        else:
+            if not is_derived:
+                raise ValueError(f'variable not found {variable}')
+
+        if is_derived:
+            derived_var_obj = _DERIVED_VAR_REGISTRY[variable]
+            query_vars = derived_var_obj.dependent_vars
+            catalog_subset_var = self.catalog.search(variable=query_vars)
+                
+        dsets = catalog_subset_var.to_dataset_dict(**kwargs)
+
+        if is_derived:
+            for key, ds in dsets.items():
+                dsets[key] = derived_var_obj(ds)
+
+        for key in dsets.keys():
+            for op, kw in zip(self.operators, self.ops_kwargs):
+                dsets[key] = op(dsets[key], **kw)
+
+        if compute:
+            dsets = {k: ds.compute() for k, ds in dsets.items()}
+
+        if self.persist:
+            self._make_cache(dsets, variable)
+
+        return dsets  
+    
+    def _make_cache(self, dsets, variable):
+        """write cache file"""
+        
+        cache_files = {variable: {}}
+        for key, ds in dsets.items():
+            
+            cache_id_dict = self.name_dict.copy()
+            cache_id_dict['key'] = key
+            cache_id_dict['variable'] = variable
+            cache_id_dict['asset'] = self._gen_cache_file_name(key, variable)
+            
+            cache_id_file = self._gen_cache_id_file_name(key, variable)
+            
+            if self._format == 'nc':
+                ds.to_netcdf(cache_id_dict['asset'])
+            elif self._format == 'zarr':
+                ds.to_zarr(cache_id_dict['asset'], mode='w', consolidated=True)
+            
+            with open(cache_id_file, 'w') as fid:
+                yaml.dump(cache_id_dict, fid)
+            
+            cache_files[variable][key] = cache_id_dict['asset']
+            
+        self._cache_files.update(cache_files)
+        
+    def _read_cache(self, variable):            
+        """read cache files"""
+        dsets = {}
+        for key, asset in self._cache_files[variable].items():
+            if self._format == 'nc':
+                with xr.open_dataset(asset, **self._open_cache_kwargs) as ds:
+                    dsets[key] = ds
+            elif self._format == 'zarr':
+                with xr.open_zarr(asset, **self._open_cache_kwargs) as ds:
+                    dsets[key] = ds
+        return dsets
+
+    def _cache_exists(self, variable, clobber):        
+        """determine if cache files exist (or clobber them)"""
+        
+        if variable in self._cache_files:
+            if clobber:
+                for asset in self._cache_files[variable].values():
+                    if os.path.exists(asset):
+                        self._remove_asset(asset)
+                return False
+            else:
+                return all(
+                    [os.path.exists(asset) for asset in self._cache_files[variable].values()]
+                )
+        else:
+            return False
+    
+    def _remove_asset(self, asset):
+        """delete asset from disk"""
+        if not os.path.exists:
+            return
+        if self._format == 'nc':
+            os.remove(asset)
+        elif self._format == 'zarr':
+            shutil.rmtree(asset)
+        
+    def _gen_cache_file_name(self, key, variable):
+        """generate a file cache name"""
+        token = dask.base.tokenize(self.name_dict, key, variable)
+        return f'{self.cache_dir}/{token}.{self._format}'
+    
+    def _gen_cache_id_file_name(self, key, variable):
+        """generate a unique cache file name"""
+        token = dask.base.tokenize(self.name_dict, key, variable)
+        return f'{cache_catalog_dir}/{cache_catalog_prefix}-{token}.yml'
+        
+    def _find_cache_id_files(self):
+        return sorted(glob(f'{cache_catalog_dir}/{cache_catalog_prefix}-*.yml'))        
+
+                    
+class derived_var(object):
+    """
+    Support computation of variables that depend on multiple variables, 
+    i.e., "derived vars"
+    """
+    def __init__(self, dependent_vars, func):
+        self.dependent_vars = dependent_vars
+        self._callable = func                
+        
+    def __call__(self, ds, **kwargs):
+        """call the function to compute derived var"""
+        self._ensure_variables(ds)
+        return self._callable(ds, **kwargs)
+            
+    def _ensure_variables(self, ds):
+        """ensure that required variables are present"""
+        missing_var = set(self.dependent_vars) - set(ds.variables)
+        if missing_var:
+            raise ValueError(f'Variables missing: {missing_var}')
+
+
+@curry
+def register_derived_var(func, varname, dependent_vars):
+    """register a function for computing derived variables"""
+    if varname in _DERIVED_VAR_REGISTRY:
+        warnings.warn(
+            f'overwriting derived variable "{varname}" definition'
+        )
+
+    _DERIVED_VAR_REGISTRY[varname] = derived_var(
+        dependent_vars, func,
+    )    
+    return func
+
+

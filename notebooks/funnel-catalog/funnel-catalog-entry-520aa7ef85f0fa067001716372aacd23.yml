@@ -1,0 +1,12 @@
+asset: /glade/scratch/mclong/tmp/520aa7ef85f0fa067001716372aacd23.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h
+operator_kwargs:
+- {}
+operators:
+- epoch_mean_present_day
+preprocess: !!python/name:__main__.subset ''
+query:
+  experiment: historical
+  stream: pop.h
+variable: SST
