@@ -1,0 +1,8 @@
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+cache_dir: /glade/p/cgd/oce/projects/cesm2-marbl/funnel
+epochs:
+  present_day:
+    time: !!python/object/apply:builtins.slice
+      - '1990'
+      - '2014'
+      - null
