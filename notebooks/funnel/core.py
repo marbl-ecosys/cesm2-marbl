@@ -2,6 +2,7 @@ import os
 from glob import glob
 import shutil
 
+import traceback
 import warnings
 import json 
 import yaml
@@ -88,7 +89,7 @@ class Collection(object):
             self.ops_kwargs = postproccess_kwargs
         
         preprocess = None if 'preprocess' not in kwargs else kwargs['preprocess'] 
-        self.name_dict = dict(
+        self.origins_dict = dict(
             esm_collection=esm_collection_json, 
             query=query, 
             preprocess=preprocess,
@@ -116,15 +117,19 @@ class Collection(object):
         
         if cache_id_files:
             for file in cache_id_files:
-                with open(file, 'r') as fid:
-                    cache_id = yaml.load(fid, Loader=yaml.Loader)
-                
-                cache_name_dict = {
+                try:
+                    with open(file, 'r') as fid:
+                        cache_id = yaml.load(fid, Loader=yaml.Loader)
+                except: # TODO: be more informative here
+                    print(f'cannot read cache: {file}...skipping')
+                    print('skipping')
+                    
+                cache_origins_dict = {
                     k: cache_id[k] 
-                    for k in self.name_dict.keys()
+                    for k in self.origins_dict.keys()
                     if k in cache_id
                 }
-                if cache_name_dict == self.name_dict:
+                if cache_origins_dict == self.origins_dict:
                     variable = cache_id['variable']
                     key = cache_id['key']
                     if variable not in self._cache_files:
@@ -159,7 +164,9 @@ class Collection(object):
             to_dsets_kwargs = kwargs.copy()
             to_dsets_kwargs.update(self._to_dsets_kwargs_defaults)            
             # TODO: optionally spin up a cluster here
-            return self._generate_dsets(variable, compute, prefer_derived, **to_dsets_kwargs)
+            return self._generate_dsets(
+                variable, compute, prefer_derived, **to_dsets_kwargs
+            )
         
     def _generate_dsets(self, variable, compute, prefer_derived, **kwargs):
         """Do the computation necessary to make `dsets`"""
@@ -211,7 +218,7 @@ class Collection(object):
         cache_files = {variable: {}}
         for key, ds in dsets.items():
             
-            cache_id_dict = self.name_dict.copy()
+            cache_id_dict = self.origins_dict.copy()
             cache_id_dict['key'] = key
             cache_id_dict['variable'] = variable
             cache_id_dict['asset'] = self._gen_cache_file_name(key, variable)
@@ -269,12 +276,12 @@ class Collection(object):
         
     def _gen_cache_file_name(self, key, variable):
         """generate a file cache name"""
-        token = dask.base.tokenize(self.name_dict, key, variable)
+        token = dask.base.tokenize(self.origins_dict, key, variable)
         return f'{self.cache_dir}/{token}.{self._format}'
     
     def _gen_cache_id_file_name(self, key, variable):
         """generate a unique cache file name"""
-        token = dask.base.tokenize(self.name_dict, key, variable)
+        token = dask.base.tokenize(self.origins_dict, key, variable)
         return f'{cache_catalog_dir}/{cache_catalog_prefix}-{token}.yml'
         
     def _find_cache_id_files(self):

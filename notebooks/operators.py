@@ -1,3 +1,6 @@
+import traceback
+import warnings
+
 import numpy as np
 import xarray as xr
 
@@ -8,12 +11,9 @@ import variable_defs
 nmols_to_PgCyr = 1e-9 * 86400. * 365. * 12e-15
 
 
-def resample_ann(ds):
-    """compute the annual mean of an xarray.Dataset"""
+def _gen_time_weights(ds):
+    """compute temporal weights using time_bound attr"""
     
-    ds = ds.copy()
-    
-    # compute temporal weights using time_bound attr
     assert 'bounds' in ds.time.attrs, 'missing "bounds" attr on time'
     tb_name = ds.time.attrs['bounds']        
     assert tb_name in ds, f'missing "{tb_name}"'
@@ -21,12 +21,20 @@ def resample_ann(ds):
     dim = ds[tb_name].dims[-1]
     ds['time'] = ds[tb_name].compute().mean(dim).squeeze()   
     
-    # compute weigths from diff of time_bound
-    weights = ds[tb_name].compute().diff(dim).squeeze()
+    return ds[tb_name].compute().diff(dim).squeeze()
+    
+
+def resample_ann(ds):
+    """compute the annual mean of an xarray.Dataset"""
+    
+    ds = ds.copy()
+    
+    weights = _gen_time_weights(ds)
     weights = weights.groupby('time.year') / weights.groupby('time.year').sum()
    
     # ensure they all add to one
-    # TODO: build support for situations when they don't, i.e. define min coverage threshold
+    # TODO: build support for situations when they don't, 
+    # i.e. define min coverage threshold
     nyr = len(weights.groupby('time.year'))
     np.testing.assert_allclose(weights.groupby('time.year').sum().values, np.ones(nyr))
         
@@ -67,3 +75,17 @@ def global_mean(ds, normalize=True):
                 
         return xr.merge([dso, ds[other_vars]])
     
+
+def epoch_mean(ds, sel_dict):
+    """compute the mean over a time range"""
+    ds = ds.sel(sel_dict) #.compute()
+    try:
+        assert False
+        weights = _gen_time_weights(ds)
+    except AssertionError as error:
+        traceback.print_tb(error.__traceback__) 
+        warnings.warn('could not generate time_weights\nusing straight average')        
+        return ds.sel(sel_dict).mean('time')       
+    
+    with xr.set_options(keep_attrs=True):
+        return (ds * weights).sum('time') / weights.sum('time')
