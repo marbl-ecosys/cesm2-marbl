@@ -22,6 +22,8 @@ os.makedirs(cache_catalog_dir, exist_ok=True)
 
 class Collection(object):
     """
+    Catalog + Query + Operation = Unique Dataset
+    
     Extend an intake-esm catalog with the ability to:
       (1) Compute derived variables combining multipe catalog entries;
       (2) Apply postprocessing operations to returned datasets;
@@ -156,17 +158,20 @@ class Collection(object):
           Keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`
         
         """
-                        
+                            
+        # TODO: check for lock file, wait if present
         if self._cache_exists(variable, clobber):
             return self._read_cache(variable)
         
         else:
+            # TODO: set lock file
             to_dsets_kwargs = kwargs.copy()
             to_dsets_kwargs.update(self._to_dsets_kwargs_defaults)            
             # TODO: optionally spin up a cluster here
             return self._generate_dsets(
                 variable, compute, prefer_derived, **to_dsets_kwargs
             )
+            # TODO: release lock
         
     def _generate_dsets(self, variable, compute, prefer_derived, **kwargs):
         """Do the computation necessary to make `dsets`"""
@@ -287,7 +292,7 @@ class Collection(object):
     def _find_cache_id_files(self):
         return sorted(glob(f'{cache_catalog_dir}/{cache_catalog_prefix}-*.yml'))        
 
-                    
+
 class derived_var(object):
     """
     Support computation of variables that depend on multiple variables, 
