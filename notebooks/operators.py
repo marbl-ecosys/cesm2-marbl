@@ -11,24 +11,45 @@ import variable_defs
 nmols_to_PgCyr = 1e-9 * 86400. * 365. * 12e-15
 
 
-def _gen_time_weights(ds):
-    """compute temporal weights using time_bound attr"""
-    
+def _get_chunks_dict(obj):
+    """why doesn't Xarray have this method?"""
+    return {d: len(chunks) for d, chunks in zip(obj.dims, obj.chunks)}    
+
+def _get_tb_name_and_tb_dim(ds):
+    """return the name of the time 'bounds' variable and its second dimension"""
     assert 'bounds' in ds.time.attrs, 'missing "bounds" attr on time'
     tb_name = ds.time.attrs['bounds']        
-    assert tb_name in ds, f'missing "{tb_name}"'
-    
-    dim = ds[tb_name].dims[-1]
-    ds['time'] = ds[tb_name].compute().mean(dim).squeeze()   
-    
-    return ds[tb_name].compute().diff(dim).squeeze()
-    
+    assert tb_name in ds, f'missing "{tb_name}"'    
+    tb_dim = ds[tb_name].dims[-1]
+    return tb_name, tb_dim
 
+
+def _gen_time_weights(ds):
+    """compute temporal weights using time_bound attr"""    
+    tb_name, tb_dim = _get_tb_name_and_tb_dim(ds)
+    chunks_dict = _get_chunks_dict(ds[tb_name])
+    del chunks_dict[tb_dim]
+    return ds[tb_name].compute().diff(tb_dim).squeeze().astype(float).chunk(chunks_dict)
+    
+    
+def center_time(ds):
+    """make time the center of the time bounds"""
+    ds = ds.copy()
+    attrs = ds.time.attrs
+    encoding = ds.time.encoding
+    tb_name, tb_dim = _get_tb_name_and_tb_dim(ds)
+    
+    ds['time'] = ds[tb_name].compute().mean(tb_dim).squeeze()
+    attrs['note'] = f'time recomputed as {tb_name}.mean({tb_dim})'
+    ds.time.attrs = attrs
+    ds.time.encoding = encoding
+    return ds
+    
+    
 def resample_ann(ds):
     """compute the annual mean of an xarray.Dataset"""
     
-    ds = ds.copy()
-    
+    ds = center_time(ds)
     weights = _gen_time_weights(ds)
     weights = weights.groupby('time.year') / weights.groupby('time.year').sum()
    
@@ -76,16 +97,20 @@ def global_mean(ds, normalize=True):
         return xr.merge([dso, ds[other_vars]])
     
 
-def epoch_mean(ds, sel_dict):
+def mean_time(ds, sel_dict):
     """compute the mean over a time range"""
-    ds = ds.sel(sel_dict) #.compute()
+    ds = ds.sel(sel_dict)
     try:
-        assert False
         weights = _gen_time_weights(ds)
     except AssertionError as error:
         traceback.print_tb(error.__traceback__) 
         warnings.warn('could not generate time_weights\nusing straight average')        
         return ds.sel(sel_dict).mean('time')       
     
+    tb_name, _ = _get_tb_name_and_tb_dim(ds)
+    time_vars = [v for v in ds.data_vars if 'time' in ds[v].dims and v != tb_name]
+    other_vars = list(set(ds.variables) - set(time_vars) - {tb_name, 'time'})
+    
     with xr.set_options(keep_attrs=True):
-        return (ds * weights).sum('time') / weights.sum('time')
+        dso = (ds[time_vars] * weights).sum('time') / weights.sum('time')
+        return xr.merge([dso, ds[other_vars]])

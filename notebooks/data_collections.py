@@ -2,34 +2,40 @@ import yaml
 
 import funnel as fn
 import operators as ops
-
+import variable_defs
 
 with open('config.yml') as fid:
     config_dict = yaml.load(fid, Loader=yaml.Loader)
     
         
-def epoch_mean(epoch_def, query):
+def epoch_mean(query, sel_dict, name='epoch_mean', center_time=True):
     """Instantiate a `funnel.Collection` object for computing epoch means."""
-    
-    time_slice_kwargs = None
-    if isinstance(epoch_def, slice):
-        time_slice_kwargs = dict(time=epoch_def)
-        
-    elif isinstance(epoch_def, str):
-        if epoch_def in config_dict['epochs']:
-            time_slice_kwargs = config_dict['epochs'][epoch_def]
- 
-    if time_slice_kwargs is None:
-        raise ValueError(
-            f'epoch_def: {epoch_def} not recognized as pre-defined or slice object'
-        )
-        
+    postproccess = [ops.mean_time] 
+    postproccess_kwargs = [dict(sel_dict=sel_dict)]    
+    if center_time:
+        postproccess = [ops.center_time] + postproccess
+        postproccess_kwargs = [{}] + postproccess_kwargs
+
     return fn.Collection(
+        name=name,
         esm_collection_json=config_dict['esm_collection'],
-        postproccess=[ops.epoch_mean],  
-        postproccess_kwargs=[dict(sel_dict=time_slice_kwargs)],
+        postproccess=postproccess,  
+        postproccess_kwargs=postproccess_kwargs,
         query=query,
         cache_dir=config_dict['cache_dir'],
         persist=True,
         cdf_kwargs=dict(chunks={'time': 4}, decode_coords=False), 
     )    
+
+
+def present_day_epoch_mean(experiment='historical', stream='pop.h'):
+    """Instantiate a `funnel.Collection` object for computing epoch means."""
+    query = dict(
+        experiment=experiment,
+        stream=stream,
+    )
+    
+    sel_dict = dict(
+        time=slice('1990', '2014')
+    )       
+    return epoch_mean(query, sel_dict, center_time=True)

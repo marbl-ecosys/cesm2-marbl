@@ -1,3 +1,6 @@
+import numpy as np
+import xarray as xr
+
 import funnel as fn
 
 
@@ -90,3 +93,85 @@ def derive_var_SST(ds):
     return ds.drop('TEMP')   
 
 
+@fn.register_derived_var(
+    varname='DOC_FLUX_IN_100m', 
+    dependent_vars=[
+        'DIA_IMPVF_DOC',
+        'HDIFB_DOC',
+        'WT_DOC',
+    ],
+)
+def derive_var_DOC_FLUX_IN_100m(ds):
+    """compute DOC flux across 100m (positive down)"""
+    k_100m_top = np.where(ds.z_w_top == 100e2)[0][0]
+    k_100m_bot = np.where(ds.z_w_bot == 100e2)[0][0]    
+    DIA_IMPVF = ds.DIA_IMPVF_DOC.isel(z_w_bot=k_100m_bot)
+    HDIFB = ds.HDIFB_DOC.isel(z_w_bot=k_100m_bot) * ds.dz[k_100m_bot]
+    WT = (-1.0) * ds.WT_DOC.isel(z_w_top=k_100m_top) * ds.dz[k_100m_top]
+    
+    ds['DOC_FLUX_IN_100m'] = (DIA_IMPVF + HDIFB + WT)
+    ds.DOC_FLUX_IN_100m.attrs = ds.WT_DOC.attrs
+    ds.DOC_FLUX_IN_100m.attrs['long_name'] = 'DOC flux across 100 m (positive down)'
+    ds.DOC_FLUX_IN_100m.attrs['units'] = 'nmol/s/cm^2'
+    ds.DOC_FLUX_IN_100m.encoding = ds.WT_DOC.encoding
+    return ds.drop(['DIA_IMPVF_DOC', 'HDIFB_DOC', 'WT_DOC'])   
+
+
+@fn.register_derived_var(
+    varname='DOCr_FLUX_IN_100m', 
+    dependent_vars=[
+        'DIA_IMPVF_DOCr',
+        'HDIFB_DOCr',
+        'WT_DOCr',
+    ],
+)
+def derive_var_DOCr_FLUX_IN_100m(ds):
+    """compute DOCr flux across 100m (positive down)"""
+    k_100m_top = np.where(ds.z_w_top == 100e2)[0][0]
+    k_100m_bot = np.where(ds.z_w_bot == 100e2)[0][0]    
+    DIA_IMPVF = ds.DIA_IMPVF_DOCr.isel(z_w_bot=k_100m_bot)
+    HDIFB = ds.HDIFB_DOCr.isel(z_w_bot=k_100m_bot) * ds.dz[k_100m_bot]
+    WT = (-1.0) * ds.WT_DOCr.isel(z_w_top=k_100m_top) * ds.dz[k_100m_top]
+    
+    ds['DOCr_FLUX_IN_100m'] = (DIA_IMPVF + HDIFB + WT)
+    ds.DOCr_FLUX_IN_100m.attrs = ds.WT_DOCr.attrs
+    ds.DOCr_FLUX_IN_100m.attrs['long_name'] = 'DOCr flux across 100 m (positive down)'
+    ds.DOCr_FLUX_IN_100m.attrs['units'] = 'nmol/s/cm^2'
+    ds.DOCr_FLUX_IN_100m.encoding = ds.WT_DOCr.encoding
+    return ds.drop(['DIA_IMPVF_DOCr', 'HDIFB_DOCr', 'WT_DOCr'])  
+
+
+@fn.register_derived_var(
+    varname='DOCt_FLUX_IN_100m', 
+    dependent_vars=[
+        'DIA_IMPVF_DOC',
+        'HDIFB_DOC',
+        'WT_DOC',        
+        'DIA_IMPVF_DOCr',
+        'HDIFB_DOCr',
+        'WT_DOCr',
+    ],
+)
+def derive_var_DOCt_FLUX_IN_100m(ds):
+    """compute DOCt (DOC + DOCr) flux across 100m (positive down)"""
+    k_100m_top = np.where(ds.z_w_top == 100e2)[0][0]
+    k_100m_bot = np.where(ds.z_w_bot == 100e2)[0][0]    
+
+    DIA_IMPVF = ds.DIA_IMPVF_DOC.isel(z_w_bot=k_100m_bot)
+    HDIFB = ds.HDIFB_DOC.isel(z_w_bot=k_100m_bot) * ds.dz[k_100m_bot]
+    WT = (-1.0) * ds.WT_DOC.isel(z_w_top=k_100m_top) * ds.dz[k_100m_top]
+    
+    DIA_IMPVF += ds.DIA_IMPVF_DOCr.isel(z_w_bot=k_100m_bot)
+    HDIFB += ds.HDIFB_DOCr.isel(z_w_bot=k_100m_bot) * ds.dz[k_100m_bot]
+    WT += (-1.0) * ds.WT_DOCr.isel(z_w_top=k_100m_top) * ds.dz[k_100m_top]
+    
+    ds['DOCt_FLUX_IN_100m'] = (DIA_IMPVF + HDIFB + WT)
+    ds.DOCt_FLUX_IN_100m.attrs = ds.WT_DOC.attrs
+    ds.DOCt_FLUX_IN_100m.attrs['long_name'] = 'Total DOC flux across 100 m (positive down)'
+    ds.DOCt_FLUX_IN_100m.attrs['units'] = 'nmol/s/cm^2'
+    ds.DOCt_FLUX_IN_100m.encoding = ds.WT_DOC.encoding   
+    
+    return ds.drop([
+        'DIA_IMPVF_DOC', 'HDIFB_DOC', 'WT_DOC',
+        'DIA_IMPVF_DOCr', 'HDIFB_DOCr', 'WT_DOCr'
+    ])

@@ -33,6 +33,9 @@ class Collection(object):
     Parameters
     ----------
     
+    name : str
+      Name of this collection.
+      
     catalog : str
       JSON file defining `intake-esm` catalog
       
@@ -60,6 +63,7 @@ class Collection(object):
        (Note: these can be updated/overridden for each call to self.dsets below.)
     """
     def __init__(self, 
+                 name,
                  esm_collection_json, 
                  query, 
                  postproccess=[], 
@@ -70,14 +74,31 @@ class Collection(object):
                  **kwargs,
                 ):
        
+        self.name = name
+    
+        # TODO: what should we do if "variable" is in the query?
+        #       for now, just remove it
+        variable = query.get('variable', None)
+        if variable is not None:            
+            warnings.warn('removed "variable" key from query')
+    
         # TODO: accept multiple catalogs and concatenate them into one?
         self.catalog = intake.open_esm_datastore(esm_collection_json).search(**query)
     
-        self.persist = persist
-        self.cache_dir = cache_dir        
+        # setup cache info
+        assert cache_format in ['nc', 'zarr'], f'unsupported format {cache_format}'             
+        self._format = cache_format        
+        self.persist = persist        
+        self.cache_dir = cache_dir         
         if self.persist and not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
+        self._open_cache_kwargs = {} # TODO: get this from config?
+        if self._format == 'zarr' and 'consolidated' not in self._open_cache_kwargs:
+            self._open_cache_kwargs['consolidated'] = True
         
+        self._to_dsets_kwargs_defaults = kwargs
+        
+        # setup operators attrs
         if not isinstance(postproccess, list):
             postproccess = [postproccess]
         self.operators = postproccess
@@ -90,24 +111,23 @@ class Collection(object):
             assert len(postproccess_kwargs) == len(postproccess), 'mismatched ops/ops_kwargs'
             self.ops_kwargs = postproccess_kwargs
         
-        preprocess = None if 'preprocess' not in kwargs else kwargs['preprocess'] 
+        # pull out "prepocess"
+        preprocess_name = None if 'preprocess' not in kwargs else kwargs['preprocess'].__name__ 
+        
+        # build origins dict
+        # TODO: save more about the function, including the source code 
+        #       rather than simply the name
         self.origins_dict = dict(
+            name=name,
             esm_collection=esm_collection_json, 
             query=query, 
-            preprocess=preprocess,
+            preprocess=preprocess_name,
             operators=[op.__name__ for op in self.operators],
             operator_kwargs=self.ops_kwargs,
         )                
+        
+        # assemble database of existing cache's
         self._assemble_cache_db()
-        
-        self._format = cache_format      
-        assert self._format in ['nc', 'zarr'], f'unsupported format {cache_format}'
-        
-        self._open_cache_kwargs = {}
-        if self._format == 'zarr' and 'consolidated' not in self._open_cache_kwargs:
-            self._open_cache_kwargs['consolidated'] = True
-        
-        self._to_dsets_kwargs_defaults = kwargs
         
     def _assemble_cache_db(self):
         """loop over yaml files in cache dir; find ones that match"""
@@ -138,7 +158,8 @@ class Collection(object):
                         self._cache_files[variable] = {}                        
                     self._cache_files[variable][key] = cache_id['asset']
             
-    def dsets(self, variable, compute=True, clobber=False, prefer_derived=False, **kwargs):
+    def to_dataset_dict(self, variable, compute=True, clobber=False, 
+                        prefer_derived=False, **kwargs):
         """
         Get dataset_dicts for assets.
         
@@ -158,8 +179,26 @@ class Collection(object):
           Keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`
         
         """
-                            
-        # TODO: check for lock file, wait if present
+        
+        # TODO: `variable` could be more flexible, 
+        # i.e. it could be a query dict with a require "variable" key
+        
+        if isinstance(variable, list):
+            dsets_list = [
+                self.to_dataset_dict(v, compute, clobber, prefer_derived, **kwargs) 
+                for v in variable
+            ]
+            keys = list(set([k for dsets in dsets_list for k in dsets.keys()]))
+            dsets_merged = {}
+            for key in keys:
+                ds_list = []
+                for dsets in dsets_list:                    
+                    if key in dsets:
+                        ds_list.append(dsets[key])
+                dsets_merged[key] = xr.merge(ds_list)
+            return dsets_merged        
+        
+        # TODO: check for lock file, wait if present        
         if self._cache_exists(variable, clobber):
             return self._read_cache(variable)
         
@@ -193,12 +232,12 @@ class Collection(object):
         else:
             if not is_derived:
                 raise ValueError(f'variable not found {variable}')
-
+        
         if is_derived:
             derived_var_obj = _DERIVED_VAR_REGISTRY[variable]
             query_vars = derived_var_obj.dependent_vars
             catalog_subset_var = self.catalog.search(variable=query_vars)
-                
+
         dsets = catalog_subset_var.to_dataset_dict(**kwargs)
 
         if is_derived:
@@ -272,7 +311,7 @@ class Collection(object):
     
     def _remove_asset(self, asset):
         """delete asset from disk"""
-        if not os.path.exists:
+        if not os.path.exists(asset):
             return
         if self._format == 'nc':
             os.remove(asset)
@@ -281,6 +320,8 @@ class Collection(object):
         
     def _gen_cache_file_name(self, key, variable):
         """generate a file cache name"""
+        # TODO: accept a user-provided callable to generate human-readable
+        #       file name
         token = dask.base.tokenize(self.origins_dict, key, variable)
         return f'{self.cache_dir}/{token}.{self._format}'
     
