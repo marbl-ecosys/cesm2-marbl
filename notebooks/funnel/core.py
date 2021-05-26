@@ -1,6 +1,7 @@
 import os
 from glob import glob
 import shutil
+import pprint
 
 import traceback
 import warnings
@@ -333,7 +334,9 @@ class Collection(object):
     def _find_cache_id_files(self):
         return sorted(glob(f'{cache_catalog_dir}/{cache_catalog_prefix}-*.yml'))        
 
-
+    def __repr__(self):
+        return pprint.pformat(self.origins_dict, indent=2, width=1)
+        
 class derived_var(object):
     """
     Support computation of variables that depend on multiple variables, 

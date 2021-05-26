@@ -41,9 +41,16 @@ slideOptions:
 
 # The Marine Biogeochemistry Library (MARBL)
 
-Matthew C. Long, Keith Lindsay, J. Keith Moore, 
-Michael Levy, Kristen Krumhardt, 
-Jessica Luo, Scott C. Doney, [Your name here?]
+Matthew C. Long, 
+Keith Lindsay,
+J. Keith Moore,
+Michael Levy,
+Scott C. Doney,
+Jessica Y. Luo,
+Kristen M. Krumhardt,
+Robert T. Letscher,
+Maxwell Grover,
+Zephyr T. Sylvester
 
 ---
 
@@ -274,6 +281,14 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
+### Transient CO<sub>2</sub> uptake
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/global-timeseries-FG_CO2.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
 ### Transient response of the biological pump
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/global-timeseries-bio-pump.png" 
@@ -282,9 +297,9 @@ Jessica Luo, Scott C. Doney, [Your name here?]
 
 ---
 
-### Transient CO<sub>2</sub> uptake
+### Transient response of the biological pump (map)
 
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/global-timeseries-FG_CO2.png" 
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-change-2100-SSP5-8.5.png" 
      style="background:none; border:none; box-shadow:none;" 
      width=1000px>
 

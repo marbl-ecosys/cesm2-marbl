@@ -60,6 +60,7 @@ def resample_ann(ds):
     np.testing.assert_allclose(weights.groupby('time.year').sum().values, np.ones(nyr))
         
     # ascertain which variables have time and which don't
+    tb_name, tb_dim = _get_tb_name_and_tb_dim(ds)
     time_vars = [v for v in ds.data_vars if 'time' in ds[v].dims and v != tb_name]
     other_vars = list(set(ds.variables) - set(time_vars) - {tb_name, 'time'} )
 
@@ -71,12 +72,16 @@ def resample_ann(ds):
         )).rename({'year': 'time'})    
 
 
-def global_mean(ds, normalize=True):
+def global_mean(ds, normalize=True, include_ms=False):
     """
     Compute the global mean on a POP dataset. 
     Return computed quantity in conventional units.
     """
-    masked_area = ds.TAREA.where(ds.REGION_MASK > 0).fillna(0.)
+    if include_ms:
+        masked_area = ds.TAREA.where(ds.KMT > 0).fillna(0.)
+    else:
+        masked_area = ds.TAREA.where(ds.REGION_MASK > 0).fillna(0.)        
+        
     compute_vars = [
         v for v in ds 
         if 'time' in ds[v].dims and ('nlat', 'nlon') == ds[v].dims[-2:]
@@ -94,7 +99,9 @@ def global_mean(ds, normalize=True):
                     dso[v] = dso[v] * nmols_to_PgCyr
                     dso[v].attrs['units'] = 'Pg C yr$^{-1}$'
                 
-        return xr.merge([dso, ds[other_vars]])
+        return xr.merge([dso, ds[other_vars]]).drop(
+            [c for c in ds.coords if ds[c].dims == ('nlat', 'nlon')]
+        )
     
 
 def mean_time(ds, sel_dict):
