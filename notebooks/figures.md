@@ -153,62 +153,6 @@ Zephyr T. Sylvester
 
 ---
 
-### Surface chlorophyll
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/chl-surface-maps.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### Nutrient limitation
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/nutrient-limitation-maps.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### Biological pump: NPP & Export
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-NPP-Export-e_ratio-N2P.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### Biological pump: Mineral fluxes
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-CaCO2-SiO2.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### DOM: Obs comparison (scatter)
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-model-obs-scatter.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### DOM: Obs comparison (maps)
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-concentration-maps.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
-### CO2 flux
-
-<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/fgco2.png" 
-     style="background:none; border:none; box-shadow:none;" 
-     width=1000px>
-
----
-
 ### Surface nutrients
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/nutrients-surface-maps.png" 
@@ -257,6 +201,54 @@ Zephyr T. Sylvester
 
 ---
 
+### Nutrient limitation
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/nutrient-limitation-maps.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### Surface chlorophyll
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/chl-surface-maps.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### Biological pump: NPP & Export
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-NPP-Export-e_ratio-N2P.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### Biological pump: Mineral fluxes
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/bio-pump-CaCO2-SiO2.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### DOM: Obs comparison (scatter)
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-model-obs-scatter.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### DOM: Obs comparison (maps)
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/DOM-concentration-maps.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
 ### Fe Cycle
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/iron-budget-maps.png" 
@@ -276,6 +268,14 @@ Zephyr T. Sylvester
 ### Fe obs comparison: maps
 
 <img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/iron-concentration-maps.png" 
+     style="background:none; border:none; box-shadow:none;" 
+     width=1000px>
+
+---
+
+### CO2 flux
+
+<img src="https://raw.githubusercontent.com/marbl-ecosys/cesm2-marbl/master/notebooks/figures/fgco2.png" 
      style="background:none; border:none; box-shadow:none;" 
      width=1000px>
 
