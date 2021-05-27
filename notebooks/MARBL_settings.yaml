@@ -179,7 +179,13 @@ Parameters :
         label : $m_Z$
     zooplankton_settings(1)%z_mort2_0_per_day :
         label : $a_Z$
-    parm_scalelen_z :
-        label : Remin length scale depths
-    parm_scalelen_vals :
-        label : Remin length scale values
+#     parm_scalelen_z :
+#         label : Remin length scale depths
+#     parm_scalelen_vals :
+#         label : Remin length scale values
+#     parm_POC_diss :
+#         label : POC$_{diss}$
+#     parm_SiO2_diss :
+#         label : \ce{SiO2}$_{diss}$
+#     parm_CaCO3_diss :
+#         label : \ce{CaCO3}$_{diss}$
