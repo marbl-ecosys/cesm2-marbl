@@ -77,22 +77,34 @@ def global_mean(ds, normalize=True, include_ms=False):
     Compute the global mean on a POP dataset. 
     Return computed quantity in conventional units.
     """
-    if include_ms:
-        masked_area = ds.TAREA.where(ds.KMT > 0).fillna(0.)
-    else:
-        masked_area = ds.TAREA.where(ds.REGION_MASK > 0).fillna(0.)        
-        
+
     compute_vars = [
         v for v in ds 
         if 'time' in ds[v].dims and ('nlat', 'nlon') == ds[v].dims[-2:]
     ]
     other_vars = list(set(ds.variables) - set(compute_vars))
 
+    if include_ms:
+        surface_mask = ds.TAREA.where(ds.KMT > 0).fillna(0.)
+    else:
+        surface_mask = ds.TAREA.where(ds.REGION_MASK > 0).fillna(0.)        
+    
+    masked_area = {
+        v: surface_mask.where(ds[v].notnull()).fillna(0.) 
+        for v in compute_vars
+    }
+
     with xr.set_options(keep_attrs=True):
         
-        dso = (ds[compute_vars] * masked_area).sum(['nlat', 'nlon'])    
+        dso = xr.Dataset({
+            v: (ds[v] * masked_area[v]).sum(['nlat', 'nlon'])
+            for v in compute_vars
+        })
         if normalize:
-            dso = dso[compute_vars] / masked_area.sum(['nlat', 'nlon'])
+            dso = xr.Dataset({
+                v: dso[v] / masked_area[v].sum(['nlat', 'nlon'])
+                for v in compute_vars
+            })            
         else:
             for v in compute_vars:
                 if v in variable_defs.C_flux_vars:

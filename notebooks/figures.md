@@ -54,31 +54,6 @@ Zephyr T. Sylvester
 
 ---
 
-## Paper outline
-- Review history of BEC-->MARBL development
-- Description of model formulations
-    - Phytoplankton growth, zooplankton grazing
-    - Detrital organic pools
-    - Nitrogen cycle
-    - Iron cycle
-    - Riverine forcing and sediments
-    - Dissolved oxygen (the kludge)
-    - MARBL features not enabled in CMIP6
-- **Results: Analyze results from CESM2-MARBL CMIP6 coupled integrations**
-
----
-
-## Results
-- Nutrient simulation
-- Surface chlorophyll
-- Limiting nutrient
-- Nitrogen cycle balance
-- Ocean circulation biases (<sup>14</sup>C, CFCs, C<sub>ant</sub>)
-- Surface CO<sub>2</sub> flux 
-- Transient response: NPP, export production, air-sea CO<sub>2</sub> flux
-
----
-
 [//]: # (AUTO-GENERATED CONTENT BELOW)
 
 ### Mixed layer depth
