@@ -20,6 +20,7 @@ def get_pint_units():
     final_units['photoC_diat_zint_100m'] = PgC_per_year
     final_units['POC_FLUX_100m'] = PgC_per_year
     final_units['CaCO3_FLUX_100m'] = PgC_per_year
+    final_units['SiO2_FLUX_100m'] = 'Tmol/yr'
     final_units['diaz_Nfix'] = TgN_per_year
     final_units['NOx_FLUX'] = TgN_per_year
     final_units['NHy_FLUX'] = TgN_per_year
@@ -89,8 +90,8 @@ def global_vars():
 
     # Should the annual averages include the marginal seas or just be open ocean?
     # (USE TRUE FOR PAPER)
-    all_vars['include_marg_seas'] = True
-    # all_vars['include_marg_seas'] = False
+#     all_vars['include_marg_seas'] = True
+    all_vars['include_marg_seas'] = False
 
     # Subdirectory in xpersist cache containing netCDF files
     all_vars['xp_dir'] = 'with_marginal_seas' if all_vars['include_marg_seas'] else 'no_marginal_seas'
@@ -105,12 +106,12 @@ def global_vars():
     all_vars['vars'] = [
                         'photoC_TOT_zint_100m', 'photoC_diat_zint_100m',
                         'photoC_TOT_zint', 'photoC_diat_zint',
-                        'POC_FLUX_100m', 'CaCO3_FLUX_100m',
+                        'POC_FLUX_100m', 'CaCO3_FLUX_100m', 'SiO2_FLUX_100m',
                         'diaz_Nfix', 'NOx_FLUX', 'NHy_FLUX', 'NHx_SURFACE_EMIS',
                         'DENITRIF', 'SedDenitrif', 'DON_RIV_FLUX', 'DONr_RIV_FLUX',
                         'NO3_RIV_FLUX', 'ponToSed', 'FG_CO2', 'O2' ,
                         'O2_under_thres', # add a thres dimension corresponding to limits
-                        'ATM_CO2',
+#                         'ATM_CO2',
                        ]
 
     # experiments is a list of experiments to compute values for
@@ -219,6 +220,11 @@ def get_table_specs(final_units, o2_levs=[]):
                              'units' : final_units['CaCO3_FLUX_100m'],
                              'rounding' : 3
                             },
+                  'SiO2' : {
+                             'key' : 'Sinking SiO$_2$ at 100 m',
+                             'units' : final_units['SiO2_FLUX_100m'],
+                             'rounding' : 3
+                            },
                   'rain' : {
                             'key' : 'Rain ratio (CaCO$_3$/POC) at 100 m',
                             'units' : None,
@@ -247,7 +253,7 @@ def get_table_specs(final_units, o2_levs=[]):
                   'Nfix' : {
                             'key' : 'Nitrogen fixation',
                             'units' : final_units['diaz_Nfix'],
-                            'rounding' : 0
+                            'rounding' : 1
                            },
                   'Ndep' : {
                             'key' : 'Nitrogen deposition',
@@ -262,7 +268,7 @@ def get_table_specs(final_units, o2_levs=[]):
                   'denitrif' : {
                                 'key' : 'Water Column Denitrification',
                                 'units' : final_units['DENITRIF'],
-                                'rounding' : 0
+                                'rounding' : 1
                                },
                   'denitrif2' : {
                                  'key' : 'Sediment Denitrification',
@@ -285,7 +291,7 @@ def get_table_specs(final_units, o2_levs=[]):
                               'rounding' : 1
                              },
                   'CO2' : {
-                           'key' : 'Air–sea CO2 flux',
+                           'key' : 'Air-sea CO$_2$ flux',
                            'units' : final_units['FG_CO2'],
                            'rounding' : 2
                           },
@@ -333,6 +339,10 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
             if verbose:
                 print(f'Computing 100m CaCO3 flux for {exp}')
             diagnostic_values[exp][table_specs['CaCO3']['key']] = _get_time_and_ensemble_mean('CaCO3_FLUX_100m', **kwargs)
+
+            if verbose:
+                print(f'Computing 100m SiO2 flux for {exp}')
+            diagnostic_values[exp][table_specs['SiO2']['key']] = _get_time_and_ensemble_mean('SiO2_FLUX_100m', **kwargs)
 
             if verbose:
                 print(f'Computing 100m rain rate for {exp}')

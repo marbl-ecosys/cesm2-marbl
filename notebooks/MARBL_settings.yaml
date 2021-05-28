@@ -1,0 +1,191 @@
+output : latex
+columns :
+    - Value
+    - Units
+    - Description
+defaults :
+    grid : CESM_x1
+    saved_state_source : settings_file
+Parameters :
+    autotroph_settings(1)%PCref_per_day :
+        label : $\mu_{ref}$
+        description_suffix : for small phytoplankton and diatoms
+#     autotroph_settings(2)%PCref_per_day :
+#         label : $\mu_{ref,\mathrm{diat}}$
+#         description_suffix : for diatoms
+    autotroph_settings(3)%PCref_per_day :
+        label : $\mu_{ref,\mathrm{diaz}}$
+        description_suffix : for diazotrophs
+    Q_10 :
+        label : $Q_{10}$
+        description : Q10 temperature coefficient
+        units : unitless
+        value : 1.7
+        source : https://github.com/marbl-ecosys/MARBL/blob/cesm2.1/src/marbl_settings_mod.F90#L97
+    Tref :
+        label : $T_{ref}$
+        description : Reference temperature
+        units : $^\circ$C
+        value : 30
+        source : https://github.com/marbl-ecosys/MARBL/blob/cesm2.1/src/marbl_constants_mod.F90#L58
+    autotroph_settings(1)%thetaN_max :
+        label : $\theta^{N}_{max,\mathrm{sp}}$
+        description : Maximum $\theta^N$ (Chl / N)
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%thetaN_max :
+        label : $\theta^{N}_{max,\mathrm{diat}}$
+        description : Maximum $\theta^N$ (Chl / N)
+        description_suffix : for diatoms
+    autotroph_settings(3)%thetaN_max :
+        label : $\theta^{N}_{max,\mathrm{diaz}}$
+        description : Maximum $\theta^N$ (Chl / N)
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%alphaPI_per_day :
+        label : $\alpha^{Chl}_{\mathrm{sp}}$
+        description : Initial slope of P\_I curve (GD98)
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%alphaPI_per_day :
+        label : $\alpha^{Chl}_{\mathrm{diat}}$
+        description : Initial slope of P\_I curve (GD98)
+        description_suffix : for diatoms
+    autotroph_settings(3)%alphaPI_per_day :
+        label : $\alpha^{Chl}_{\mathrm{diaz}}$
+        description : Initial slope of P\_I curve (GD98)
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%kFe :
+        label : $K_\mathrm{sp}^{\ce{Fe}}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%kFe :
+        label : $K_\mathrm{diat}^{\ce{Fe}}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%kFe :
+        label : $K_\mathrm{diaz}^{\ce{Fe}}$
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%kNO3 :
+        label : $K_\mathrm{sp}^{\ce{NO3}}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%kNO3 :
+        label : $K_\mathrm{diat}^{\ce{NO3}}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%kNO3 :
+        label : $K_\mathrm{diaz}^{\ce{NO3}}$
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%kNH4 :
+        label : $K_\mathrm{sp}^{\ce{NH4}}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%kNH4 :
+        label : $K_\mathrm{diat}^{\ce{NH4}}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%kNH4 :
+        label : $K_\mathrm{diaz}^{\ce{NH4}}$
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%kPO4 :
+        label : $K_\mathrm{sp}^{\ce{PO4}}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%kPO4 :
+        label : $K_\mathrm{diat}^{\ce{PO4}}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%kPO4 :
+        label : $K_\mathrm{diaz}^{\ce{PO4}}$
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%kDOP :
+        label : $K_\mathrm{sp}^{\ce{DOP}}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%kDOP :
+        label : $K_\mathrm{diat}^{\ce{DOP}}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%kDOP :
+        label : $K_\mathrm{diaz}^{\ce{DOP}}$
+        description_suffix : for diazotrophs
+#     autotroph_settings(1)%kSiO3 :
+#         label : $K_\mathrm{sp}^{\ce{SiO3}}$
+#         description_suffix : for small phytoplankton
+    autotroph_settings(2)%kSiO3 :
+        label : $K_\mathrm{diat}^{\ce{SiO3}}$
+        description_suffix : for diatoms
+#     autotroph_settings(3)%kSiO3 :
+#         label : $K_\mathrm{diaz}^{\ce{SiO3}}$
+#         description_suffix : for diazotrophs
+    autotroph_settings(1)%agg_rate_min :
+        label : $a_\mathrm{sp}^{min}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%agg_rate_min :
+        label : $a_\mathrm{diat}^{min}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%agg_rate_min :
+        label : $a_\mathrm{diaz}^{min}$
+        description_suffix : for diazotrophs
+    autotroph_settings(1)%agg_rate_max :
+        label : $a_\mathrm{sp}^{max}$
+        description_suffix : for small phytoplankton
+    autotroph_settings(2)%agg_rate_max :
+        label : $a_\mathrm{diat}^{max}$
+        description_suffix : for diatoms
+    autotroph_settings(3)%agg_rate_max :
+        label : $a_\mathrm{diaz}^{max}$
+        description_suffix : for diazotrophs
+    grazing_relationship_settings(1,1)%z_umax_0_per_day :
+        label : $g_\mathrm{sp}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for small phytoplankton
+    grazing_relationship_settings(2,1)%z_umax_0_per_day :
+        label : $g_\mathrm{diat}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for diatoms
+    grazing_relationship_settings(3,1)%z_umax_0_per_day :
+        label : $g_\mathrm{diaz}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for diazotrophs
+    grazing_relationship_settings(1,1)%z_grz :
+        label : $K_i^{P}$
+        description : zooplankton grazing half saturation constant
+        description_suffix : for all phytoplankton
+        units : mmol/m^3
+#     grazing_relationship_settings(2,1)%z_grz :
+#         label : $K_\mathrm{diat}^{P}$
+#         description : zooplankton grazing half saturation constant
+#         description_suffix : for diatoms
+#         units : mmol/m^3
+#     grazing_relationship_settings(3,1)%z_grz :
+#         label : $K_\mathrm{diaz}^{P}$
+#         description : zooplankton grazing half saturation constant
+#         description_suffix : for diazotrophs
+#         units : mmol/m^3
+    grazing_relationship_settings(1,1)%z_umax_0_per_day :
+        label : $g_\mathrm{sp}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for small phytoplankton
+    grazing_relationship_settings(2,1)%z_umax_0_per_day :
+        label : $g_\mathrm{diat}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for diatoms
+    grazing_relationship_settings(3,1)%z_umax_0_per_day :
+        label : $g_\mathrm{diaz}^{max}$
+        description : Maximum grazing rate
+        description_suffix : for diazotrophs
+    grazing_relationship_settings(1,1)%graze_zoo :
+        label : $\gamma_\mathrm{sp}$
+        description : Gross growth efficiency coefficient for grazing
+        description_suffix : for small phytoplankton
+    grazing_relationship_settings(2,1)%graze_zoo :
+        label : $\gamma_\mathrm{diat}$
+        description : Gross growth efficiency coefficient for grazing
+        description_suffix : for diatoms
+    grazing_relationship_settings(3,1)%graze_zoo :
+        label : $\gamma_\mathrm{diaz}$
+        description : Gross growth efficiency coefficient for grazing
+        description_suffix : for diazotrophs
+    zooplankton_settings(1)%z_mort_0_per_day :
+        label : $m_Z$
+    zooplankton_settings(1)%z_mort2_0_per_day :
+        label : $a_Z$
+#     parm_scalelen_z :
+#         label : Remin length scale depths
+#     parm_scalelen_vals :
+#         label : Remin length scale values
+#     parm_POC_diss :
+#         label : POC$_{diss}$
+#     parm_SiO2_diss :
+#         label : \ce{SiO2}$_{diss}$
+#     parm_CaCO3_diss :
+#         label : \ce{CaCO3}$_{diss}$
