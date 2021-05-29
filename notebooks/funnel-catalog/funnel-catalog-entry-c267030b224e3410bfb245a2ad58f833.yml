@@ -1,0 +1,20 @@
+asset: /glade/p/cgd/oce/projects/cesm2-marbl/funnel/c267030b224e3410bfb245a2ad58f833.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.SSP1-2.6.pop.h
+name: epoch_mean
+operator_kwargs:
+- {}
+- {}
+operators:
+- center_time
+- mean_time_for_experiment
+preprocess: null
+query:
+  experiment:
+  - historical
+  - SSP1-2.6
+  - SSP2-4.5
+  - SSP3-7.0
+  - SSP5-8.5
+  stream: pop.h
+variable: POC_FLUX_100m

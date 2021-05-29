@@ -4,8 +4,6 @@ import warnings
 import numpy as np
 import xarray as xr
 
-import funnel as fn
-
 import variable_defs
 
 nmols_to_PgCyr = 1e-9 * 86400. * 365. * 12e-15

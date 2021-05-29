@@ -6,12 +6,32 @@ import variable_defs
 
 with open('config.yml') as fid:
     config_dict = yaml.load(fid, Loader=yaml.Loader)
-    
+
+
+def _get_experiment_sel_dict(experiment):
+    if experiment == 'historical':
+        return dict(time=slice('1990', '2014'))
+    elif 'SSP'  in experiment:
+        return dict(time=slice('2086', '2100'))        
+    else:
+        raise ValueError(f'no sel_dict setting for {experiment}')
+
         
-def epoch_mean(query, sel_dict, name='epoch_mean', center_time=True):
+@fn.register_query_dependent_op(
+    query_keys=['experiment'],
+)
+def _mean_time_for_experiment(ds, experiment):
+    """compute the mean over time"""
+    return ops.mean_time(
+        ds, 
+        sel_dict=_get_experiment_sel_dict(experiment),
+    )
+
+
+def epoch_mean(query, name='epoch_mean', center_time=True):
     """Instantiate a `funnel.Collection` object for computing epoch means."""
-    postproccess = [ops.mean_time] 
-    postproccess_kwargs = [dict(sel_dict=sel_dict)]    
+    postproccess = [_mean_time_for_experiment] 
+    postproccess_kwargs = [{}]    
     if center_time:
         postproccess = [ops.center_time] + postproccess
         postproccess_kwargs = [{}] + postproccess_kwargs
@@ -24,7 +44,7 @@ def epoch_mean(query, sel_dict, name='epoch_mean', center_time=True):
         query=query,
         cache_dir=config_dict['cache_dir'],
         persist=True,
-        cdf_kwargs=dict(chunks={'time': 4}, decode_coords=False), 
+        cdf_kwargs=dict(chunks={'time': 4}), 
     )
 
 
@@ -87,5 +107,18 @@ def present_day_epoch_mean(experiment='historical', stream='pop.h'):
     
     sel_dict = dict(
         time=slice('1990', '2014')
+    )       
+    return epoch_mean(query, sel_dict, center_time=True)
+
+
+def end21C_epoch_mean(experiment, stream='pop.h'):
+    """Instantiate a `funnel.Collection` object for computing epoch means."""
+    query = dict(
+        experiment=experiment,
+        stream=stream,
+    )
+    
+    sel_dict = dict(
+        time=slice('2086', '2100')
     )       
     return epoch_mean(query, sel_dict, center_time=True)

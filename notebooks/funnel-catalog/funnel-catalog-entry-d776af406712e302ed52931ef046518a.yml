@@ -1,0 +1,19 @@
+asset: /glade/p/cgd/oce/projects/cesm2-marbl/funnel/d776af406712e302ed52931ef046518a.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h
+name: epoch_mean
+operator_kwargs:
+- {}
+- sel_dict:
+    time: !!python/object/apply:builtins.slice
+    - '1990'
+    - '2014'
+    - null
+operators:
+- center_time
+- mean_time
+preprocess: null
+query:
+  experiment: historical
+  stream: pop.h
+variable: DOCt

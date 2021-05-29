@@ -16,7 +16,7 @@ import xarray as xr
 from toolz import curry
 
 from . config import cache_catalog_dir, cache_catalog_prefix
-from . registry import _DERIVED_VAR_REGISTRY
+from . registry import _DERIVED_VAR_REGISTRY, _QUERY_DEPENDENT_OP_REGISTRY
 
 os.makedirs(cache_catalog_dir, exist_ok=True)
 
@@ -93,7 +93,7 @@ class Collection(object):
         self.cache_dir = cache_dir         
         if self.persist and not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
-        self._open_cache_kwargs = {} # TODO: get this from config?
+        self._open_cache_kwargs = dict() # TODO: get this from config?
         if self._format == 'zarr' and 'consolidated' not in self._open_cache_kwargs:
             self._open_cache_kwargs['consolidated'] = True
         
@@ -240,14 +240,23 @@ class Collection(object):
             catalog_subset_var = self.catalog.search(variable=query_vars)
 
         dsets = catalog_subset_var.to_dataset_dict(**kwargs)
-
+        key_info = _intake_esm_get_keys_info(catalog_subset_var)
+        
         if is_derived:
             for key, ds in dsets.items():
                 dsets[key] = derived_var_obj(ds)
 
         for key in dsets.keys():
             for op, kw in zip(self.operators, self.ops_kwargs):
-                dsets[key] = op(dsets[key], **kw)
+                if hash(op) in _QUERY_DEPENDENT_OP_REGISTRY:
+                    op_obj = _QUERY_DEPENDENT_OP_REGISTRY[hash(op)]             
+                    dsets[key] = op_obj(
+                        dsets[key], 
+                        query_dict=key_info[key],
+                        **kw,
+                    )
+                else:
+                    dsets[key] = op(dsets[key], **kw)
 
         if compute:
             dsets = {k: ds.compute() for k, ds in dsets.items()}
@@ -358,6 +367,20 @@ class derived_var(object):
             raise ValueError(f'Variables missing: {missing_var}')
 
 
+class query_dependent_op(object):
+    """
+    Support calling functions that depend on the values of the query.
+    """
+    def __init__(self, func, query_keys):
+        self._callable = func
+        self._query_keys = query_keys
+    
+    def __call__(self, ds, query_dict, **kwargs):
+        """call function with query keys added to keyword args"""
+        kwargs.update({k: query_dict[k] for k in self._query_keys})
+        return self._callable(ds, **kwargs)
+    
+    
 @curry
 def register_derived_var(func, varname, dependent_vars):
     """register a function for computing derived variables"""
@@ -371,4 +394,36 @@ def register_derived_var(func, varname, dependent_vars):
     )    
     return func
 
+
+@curry
+def register_query_dependent_op(func, query_keys):
+    """register a function for computing derived variables"""
+    func_hash = hash(func)
+    if func_hash in _QUERY_DEPENDENT_OP_REGISTRY:
+        warnings.warn(
+            f'overwriting query dependent operator "{func.__name__}" definition'
+        )
+
+    _QUERY_DEPENDENT_OP_REGISTRY[func_hash] = query_dependent_op(
+        func, query_keys,
+    )    
+    return func
+
+
+def _intake_esm_get_keys_info(cat):
+    """return a dictionary with the values of components of the keys in an
+       intake catalog
+    """
+    groupby_attrs_values = {
+        k: cat.unique(columns=k)[k]['values'] 
+        for k in cat.groupby_attrs
+    }        
+    key_info = {k: {} for k in cat.keys()}
+    for key in cat.keys():
+        for attr in cat.groupby_attrs:
+            values = groupby_attrs_values[attr]
+            match = [v for v in values if v in key]
+            assert len(match) == 1, 'expecting a unique match'
+            key_info[key][attr] = match[0]
+    return key_info
 

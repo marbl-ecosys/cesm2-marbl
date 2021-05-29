@@ -175,3 +175,42 @@ def derive_var_DOCt_FLUX_IN_100m(ds):
         'DIA_IMPVF_DOC', 'HDIFB_DOC', 'WT_DOC',
         'DIA_IMPVF_DOCr', 'HDIFB_DOCr', 'WT_DOCr'
     ])
+
+
+@fn.register_derived_var(
+    varname='DOCt', 
+    dependent_vars=['DOC', 'DOCr'],
+)
+def derive_var_DOCt(ds):
+    """compute DOCt"""
+    ds['DOCt'] = ds['DOC'] + ds['DOCr']
+    ds.DOCt.attrs = ds.DOC.attrs
+    ds.DOCt.attrs['long_name'] = 'Dissolved Organic Carbon (total)'
+    ds.DOCt.encoding = ds.DOC.encoding
+    return ds.drop(['DOC', 'DOCr'])
+
+
+@fn.register_derived_var(
+    varname='DONt', 
+    dependent_vars=['DON', 'DONr'],
+)
+def derive_var_DONt(ds):
+    """compute DONt"""
+    ds['DONt'] = ds['DON'] + ds['DONr']
+    ds.DONt.attrs = ds.DON.attrs
+    ds.DONt.attrs['long_name'] = 'Dissolved Organic Nitrogen (total)'
+    ds.DONt.encoding = ds.DON.encoding
+    return ds.drop(['DON', 'DONr'])
+
+
+@fn.register_derived_var(
+    varname='DOPt', 
+    dependent_vars=['DOP', 'DOPr'],
+)
+def derive_var_DOPt(ds):
+    """compute DOPt"""
+    ds['DOPt'] = ds['DOP'] + ds['DOPr']
+    ds.DOPt.attrs = ds.DOP.attrs
+    ds.DOPt.attrs['long_name'] = 'Dissolved Organic Phosphorus (total)'
+    ds.DOPt.encoding = ds.DOP.encoding
+    return ds.drop(['DOP', 'DOPr'])

@@ -1,4 +1,4 @@
-month,lon,lat,depth,DON_tot_obs,DOP_tot_obs,DOC_tot_obs
+month,lon,lat,depth,DONt_obs,DOPt_obs,DOCt_obs
 ,,,,,,
 3,-49.30228,-35.08802,11.9,3.05,0.015,-999
 ,,,,,,
