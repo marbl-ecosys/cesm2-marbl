@@ -97,28 +97,3 @@ def global_integral_timeseries_ann(query, name='global_mean_timeseries_ann',
         persist=True,
         cdf_kwargs=dict(chunks={'time': 4}, decode_coords=False), 
     ) 
-
-def present_day_epoch_mean(experiment='historical', stream='pop.h'):
-    """Instantiate a `funnel.Collection` object for computing epoch means."""
-    query = dict(
-        experiment=experiment,
-        stream=stream,
-    )
-    
-    sel_dict = dict(
-        time=slice('1990', '2014')
-    )       
-    return epoch_mean(query, sel_dict, center_time=True)
-
-
-def end21C_epoch_mean(experiment, stream='pop.h'):
-    """Instantiate a `funnel.Collection` object for computing epoch means."""
-    query = dict(
-        experiment=experiment,
-        stream=stream,
-    )
-    
-    sel_dict = dict(
-        time=slice('2086', '2100')
-    )       
-    return epoch_mean(query, sel_dict, center_time=True)

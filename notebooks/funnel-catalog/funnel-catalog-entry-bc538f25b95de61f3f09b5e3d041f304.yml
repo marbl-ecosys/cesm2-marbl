@@ -1,0 +1,15 @@
+asset: /glade/p/cgd/oce/projects/cesm2-marbl/funnel/bc538f25b95de61f3f09b5e3d041f304.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h.ecosys.nyear1
+name: epoch_mean
+operator_kwargs:
+- {}
+- {}
+operators:
+- center_time
+- _mean_time_for_experiment
+preprocess: null
+query:
+  experiment: historical
+  stream: pop.h.ecosys.nyear1
+variable: DOCt_FLUX_IN_100m
