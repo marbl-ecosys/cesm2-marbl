@@ -204,6 +204,23 @@ def global_vars():
     all_vars['time_slices']['cesm2_SSP3-7.0'] = time_slices_2090s
     all_vars['time_slices']['cesm2_SSP5-8.5'] = time_slices_2090s
 
+    # experiment_len is the expected number of years we average over for each time period
+    all_vars['experiment_len'] = {
+                                   'cesm1_PI' : 200,
+                                   'cesm1_PI_esm' : 200,
+                                   'cesm1_hist' : 25,
+                                   'cesm1_hist_esm' : 10,
+                                   'cesm1_hist_RCP85' : 25,
+                                   'cesm1_RCP85' : 10,
+                                   'cesm1_RCP85_esm' : 25,
+                                   'cesm2_PI' : 520,
+                                   'cesm2_hist' : 25,
+                                   'cesm2_SSP1-2.6' : 10,
+                                   'cesm2_SSP2-4.5' : 10,
+                                   'cesm2_SSP3-7.0' : 10,
+                                   'cesm2_SSP5-8.5' : 10
+                                  }
+
     return all_vars
 
 ##################################################
@@ -317,13 +334,14 @@ def get_table_specs(final_units, o2_levs=[]):
 
 ##################################################
 
-def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, cesm_units, final_units, verbose=False):
+def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, cesm_units, final_units, experiment_len, verbose=False):
     diagnostic_values = dict()
     kwargs = dict()
     kwargs['ann_avg'] = ann_avg
     kwargs['time_slices'] = time_slices
     kwargs['cesm_units'] = cesm_units
     kwargs['final_units'] = final_units
+    kwargs['experiment_len'] = experiment_len
     for model_version in experiments:
         exp_loop = experiments[model_version]
         if model_version == 'cesm1' and 'cesm1_hist' in exp_loop and 'cesm1_RCP85' in exp_loop:
@@ -455,13 +473,17 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
 
 ##################################################
 
-def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units, final_units):
+def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units, final_units, experiment_len):
     try:
         if exp in ['cesm1_PI', 'cesm1_PI_esm', 'cesm2_PI']:
             # Need isel instead of sel since PI slices are in index space rather than years
-            ens_time_mean = (ann_avg[variable][exp][variable].isel(time=time_slices[exp]).mean('member_id')).mean('time').values
+            ds = ann_avg[variable][exp][variable].isel(time=time_slices[exp])
         else:
-            ens_time_mean = (ann_avg[variable][exp][variable].sel(time=time_slices[exp]).mean('member_id')).mean('time').values
+            ds = ann_avg[variable][exp][variable].sel(time=time_slices[exp])
+        if len(ds['time'].values) != experiment_len[exp]:
+            print(f"Time dimension for {variable} runs from {ds['time'].values[0]} to {ds['time'].values[-1]} for {exp}")
+            print(f"(That covers {len(ds['time'].values)} time samples, expected {experiment_len[exp]})")
+        ens_time_mean = ds.mean('member_id').mean('time').values
     except:
         print(f'   * Can not compute {variable} for {exp}')
         return('-')
