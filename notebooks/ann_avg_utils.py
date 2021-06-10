@@ -204,21 +204,21 @@ def global_vars():
     all_vars['time_slices']['cesm2_SSP3-7.0'] = time_slices_2090s
     all_vars['time_slices']['cesm2_SSP5-8.5'] = time_slices_2090s
 
-    # experiment_len is the expected number of years we average over for each time period
-    all_vars['experiment_len'] = {
-                                   'cesm1_PI' : 200,
-                                   'cesm1_PI_esm' : 200,
-                                   'cesm1_hist' : 25,
-                                   'cesm1_hist_esm' : 10,
-                                   'cesm1_hist_RCP85' : 25,
-                                   'cesm1_RCP85' : 10,
-                                   'cesm1_RCP85_esm' : 25,
-                                   'cesm2_PI' : 520,
-                                   'cesm2_hist' : 25,
-                                   'cesm2_SSP1-2.6' : 10,
-                                   'cesm2_SSP2-4.5' : 10,
-                                   'cesm2_SSP3-7.0' : 10,
-                                   'cesm2_SSP5-8.5' : 10
+    # experiment_span is a tuple of (start_year, end_year) we average over for each time period
+    all_vars['experiment_span'] = {
+                                   'cesm1_PI' : (121, 320),
+                                   'cesm1_PI_esm' : (321, 520),
+                                   'cesm1_hist' : (1981, 2005),
+                                   'cesm1_hist_esm' : (1990, 1999),
+                                   'cesm1_hist_RCP85' : (1990, 2014),
+                                   'cesm1_RCP85' : (2090, 2099),
+                                   'cesm1_RCP85_esm' : (2090, 2099),
+                                   'cesm2_PI' : (551, 1070),
+                                   'cesm2_hist' : (1990, 2014),
+                                   'cesm2_SSP1-2.6' : (2090, 2099),
+                                   'cesm2_SSP2-4.5' : (2090, 2099),
+                                   'cesm2_SSP3-7.0' : (2090, 2099),
+                                   'cesm2_SSP5-8.5' : (2090, 2099)
                                   }
 
     return all_vars
@@ -334,14 +334,14 @@ def get_table_specs(final_units, o2_levs=[]):
 
 ##################################################
 
-def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, cesm_units, final_units, experiment_len, verbose=False):
+def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, cesm_units, final_units, experiment_span, verbose=False):
     diagnostic_values = dict()
     kwargs = dict()
     kwargs['ann_avg'] = ann_avg
     kwargs['time_slices'] = time_slices
     kwargs['cesm_units'] = cesm_units
     kwargs['final_units'] = final_units
-    kwargs['experiment_len'] = experiment_len
+    kwargs['experiment_span'] = experiment_span
     for model_version in experiments:
         exp_loop = experiments[model_version]
         if model_version == 'cesm1' and 'cesm1_hist' in exp_loop and 'cesm1_RCP85' in exp_loop:
@@ -473,16 +473,27 @@ def compute_diagnostic_values(experiments, table_specs, ann_avg, time_slices, ce
 
 ##################################################
 
-def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units, final_units, experiment_len):
+def _get_time_and_ensemble_mean(variable, ann_avg, exp, time_slices, cesm_units, final_units, experiment_span):
     try:
         if exp in ['cesm1_PI', 'cesm1_PI_esm', 'cesm2_PI']:
             # Need isel instead of sel since PI slices are in index space rather than years
             ds = ann_avg[variable][exp][variable].isel(time=time_slices[exp])
         else:
             ds = ann_avg[variable][exp][variable].sel(time=time_slices[exp])
-        if len(ds['time'].values) != experiment_len[exp]:
+        experiment_len = experiment_span[exp][1] - experiment_span[exp][0] + 1
+        if len(ds['time'].values) == experiment_len:
+            try:
+                start_year = ds['time'].values[0].year
+                end_year = ds['time'].values[-1].year
+            except:
+                start_year = ds['time'].values[0]
+                end_year = ds['time'].values[-1]
+            if (start_year != experiment_span[exp][0]) or (end_year != experiment_span[exp][1]):
+                print(f"Time dimension for {variable} runs from {ds['time'].values[0]} to {ds['time'].values[-1]} for {exp}")
+                print(f"(Expected {experiment_span[exp][0]} to {experiment_span[exp][1]})")
+        else:
             print(f"Time dimension for {variable} runs from {ds['time'].values[0]} to {ds['time'].values[-1]} for {exp}")
-            print(f"(That covers {len(ds['time'].values)} time samples, expected {experiment_len[exp]})")
+            print(f"(That covers {len(ds['time'].values)} time samples, expected {experiment_len})")
         ens_time_mean = ds.mean('member_id').mean('time').values
     except:
         print(f'   * Can not compute {variable} for {exp}')
