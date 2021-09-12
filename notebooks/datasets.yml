@@ -9,9 +9,18 @@ historical_1990-2015:
   - co3_sat_calc  
   - DIC
   - DIC_ALT_CO2
+  - diat_P_lim_Cweight_avg_100m
+  - diat_Fe_lim_Cweight_avg_100m
+  - diat_N_lim_Cweight_avg_100m
+  - diat_SiO3_lim_Cweight_avg_100m
+  - diaz_P_lim_Cweight_avg_100m
+  - diaz_Fe_lim_Cweight_avg_100m    
   - NO3
   - PO4
   - SALT  
   - SiO3
+  - sp_P_lim_Cweight_avg_100m
+  - sp_Fe_lim_Cweight_avg_100m
+  - sp_N_lim_Cweight_avg_100m
   - TEMP
 
