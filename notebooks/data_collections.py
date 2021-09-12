@@ -4,7 +4,7 @@ import funnel as fn
 import operators as ops
 import variable_defs
 
-with open('config.yml') as fid:
+with open('_config_calc.yml') as fid:
     config_dict = yaml.load(fid, Loader=yaml.Loader)
 
 _collections = config_dict['data_collections']
