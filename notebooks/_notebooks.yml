@@ -1,0 +1,23 @@
+pre-stage:
+  - _data-Ncycle
+  - _data-nutrient-plots
+  - _data-compute-obs-mld
+  - _data-co2-flux-obs
+  
+main:
+  - mld
+  - ventilation
+  - nutrients
+  - dic-alk-omega
+  - nutient-limitation
+  - chlorophyll
+  - biological-pump
+  - community-composition
+  - fgco2
+  - DOM-comparison
+  - DOM-export
+  - Ncycle
+  - Fe-comparison
+  - transient-fgco2.ipynb
+  - transient-biological-pump.ipynb
+  

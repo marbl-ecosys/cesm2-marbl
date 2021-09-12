@@ -57,6 +57,13 @@ historical_1990-2015:
   - spChl
   - TEMP
   - zooC
+  - DIA_IMPVF_DOC
+  - HDIFB_DOC
+  - WT_DOC  
+  - DIA_IMPVF_DOCr
+  - HDIFB_DOCr
+  - WT_DOCr
+
 
 # timeseries
 historical:
