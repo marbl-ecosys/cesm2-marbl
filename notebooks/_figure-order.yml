@@ -1,0 +1,27 @@
+'01': mld-maps-125
+'02': za-obs-comparison-pCFC11
+'03': za-obs-comparison-Del14C
+'04': za-obs-comparison-Cant_v1pGruber2019
+'05': nutrients-surface-maps
+'06': nutrients-sections-NO3
+'07': nutrients-sections-PO4
+'08': nutrients-sections-SiO3
+'08.1': dic-alk-omega-surface-maps
+'08.2': za-obs-comparison-sDIC
+'08.3': za-obs-comparison-sALK
+'09': nutrient-limitation-maps
+'10': chl-surface-maps
+'11': bio-pump-NPP-Export-e_ratio-N2P
+'11.1': community-composition
+'12': bio-pump-CaCO2-SiO2
+'13': fgco2
+'14': DOM-concentration-maps
+'15': DOM-model-obs-scatter
+'16': Ncycle
+'17': iron-budget-maps
+'18': iron-concentration-maps
+'19': iron-global-ocean-obs-PDF
+'20': global-timeseries-FG_CO2
+'21': global-timeseries-bio-pump
+'22': bio-pump-change-2100-SSP5-8.5
+

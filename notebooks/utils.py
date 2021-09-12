@@ -1,7 +1,10 @@
 import os
 import shutil
+
 import subprocess
 import tempfile
+
+import yaml
 
 import matplotlib.pyplot as plt
 
@@ -11,24 +14,48 @@ import numpy as np
 import pop_tools
 
 
+def _gen_plotname(plot_name):
+    """generate a name for plotting"""
+    plot_basename, ext = os.path.splitext(plot_name)
+
+    fig_key = None    
+    if os.path.exists('_figure-order.yml'):
+        with open('_figure-order.yml') as fid:
+            fig_map = yaml.safe_load(fid)
+        assert len(set(fig_map.values())) == len(fig_map.values()), (
+            'non-unique figure names found in _figure-order.yml'
+        )        
+        for key, value in fig_map.items():
+            if plot_basename == value:
+                fig_key = key 
+                break
+                
+    if 'TEST_PLOT_FIGURE_DIR' in os.environ:
+        dirout_main = os.environ['TEST_PLOT_FIGURE_DIR']
+    else:
+        dirout_main = 'figures'    
+
+    if fig_key is not None:
+        plot_basename = f'{fig_key}-{plot_basename}'
+        dirout = dirout_main
+    else:
+        dirout = f'{dirout_main}/misc'        
+    os.makedirs(dirout, exist_ok=True)    
+        
+    return dirout, plot_basename
+
+
 def savefig(plot_name):
     """Write figure"""
     
-    if 'CO2_HOLE_FIGURE_DIR' in os.environ:
-        dirout = os.environ['CO2_HOLE_FIGURE_DIR']
-    else:
-        dirout = 'figures'
-    
-    os.makedirs(dirout, exist_ok=True)
-    
-    plot_basename, ext = os.path.splitext(plot_name)
+    dirout, plot_basename = _gen_plotname(plot_name)
     
     for ext in ['pdf', 'png']:
-        plt.savefig(os.path.join(dirout, f'{plot_basename}.{ext}'), 
+        plt.savefig(f'{dirout}/{plot_basename}.{ext}', 
                     dpi=300, 
                     bbox_inches='tight', 
                     metadata={'CreationDate': None})
-
+        
         
 def write_ds_out(dso, file_out):
     file_out = os.path.realpath(file_out)
