@@ -13,23 +13,33 @@ historical_1990-2015:
   - diat_P_lim_Cweight_avg_100m
   - diat_Fe_lim_Cweight_avg_100m
   - diat_N_lim_Cweight_avg_100m
+  - diatC
   - diatChl
   - diat_SiO3_lim_Cweight_avg_100m
   - diaz_P_lim_Cweight_avg_100m
   - diaz_Fe_lim_Cweight_avg_100m    
+  - diazC
   - diazChl
+  - graze_diat_zoo_zint_100m
+  - graze_diaz_zoo_zint_100m
+  - graze_sp_zoo_zint_100m
   - Jint_100m_DIC
   - NO3
   - PO4
   - POC_FLUX_100m
   - POP_FLUX_100m
   - photoC_TOT_zint_100m
+  - photoC_sp_zint_100m
+  - photoC_diat_zint_100m
+  - photoC_diaz_zint_100m
   - SALT  
   - SiO3
   - SiO2_FLUX_100m
   - sp_P_lim_Cweight_avg_100m
   - sp_Fe_lim_Cweight_avg_100m
   - sp_N_lim_Cweight_avg_100m
+  - spC
   - spChl
   - TEMP
+  - zooC
 
