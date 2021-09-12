@@ -1,118 +1,115 @@
-historical:
-  - ABIO_DIC14
-  - ABIO_DIC
-  - ALK
-  - ATM_CO2
-  - CaCO3_FLUX_100m
-  - CFC11
-  - CFC12  
-  - CO3
-  - co3_sat_arag
-  - co3_sat_calc  
-  - DENITRIF
-  - DIC
-  - DIC_ALT_CO2
-  - DOC
-  - DOCr
-  - DON
-  - DONr
-  - DOP
-  - DOPr  
-  - diat_P_lim_Cweight_avg_100m
-  - diat_Fe_lim_Cweight_avg_100m
-  - diat_N_lim_Cweight_avg_100m
-  - diatC
-  - diatChl
-  - diat_SiO3_lim_Cweight_avg_100m
-  - diaz_Nfix
-  - diaz_P_lim_Cweight_avg_100m
-  - diaz_Fe_lim_Cweight_avg_100m    
-  - diazC
-  - diazChl
-  - dust_REMIN
-  - Fe
-  - Fe_RIV_FLUX
-  - FG_CO2
-  - graze_diat_zoo_zint_100m
-  - graze_diaz_zoo_zint_100m
-  - graze_sp_zoo_zint_100m
-  - IRON_FLUX
-  - Jint_100m_DIC
-  - MOC
-  - NO3
-  - PO4
-  - POC_FLUX_100m
-  - POP_FLUX_100m
-  - pfeToSed
-  - photoC_TOT_zint_100m
-  - photoC_sp_zint_100m
-  - photoC_diat_zint_100m
-  - photoC_diaz_zint_100m
-  - SALT  
-  - SiO3
-  - SiO2_FLUX_100m
-  - sp_P_lim_Cweight_avg_100m
-  - sp_Fe_lim_Cweight_avg_100m
-  - sp_N_lim_Cweight_avg_100m
-  - spC
-  - spChl
-  - TEMP
-  - zooC
-  - DIA_IMPVF_DOC
-  - HDIFB_DOC
-  - WT_DOC  
-  - DIA_IMPVF_DOCr
-  - HDIFB_DOCr
-  - WT_DOCr
+epoch_mean:
+    historical:
+      - ABIO_DIC14
+      - ABIO_DIC
+      - ALK
+      - CaCO3_FLUX_100m
+      - CFC11
+      - CFC12  
+      - CO3
+      - co3_sat_arag
+      - co3_sat_calc  
+      - DENITRIF
+      - DIC
+      - DIC_ALT_CO2
+      - DOC
+      - DOCr
+      - DON
+      - DONr
+      - DOP
+      - DOPr  
+      - diat_P_lim_Cweight_avg_100m
+      - diat_Fe_lim_Cweight_avg_100m
+      - diat_N_lim_Cweight_avg_100m
+      - diatC
+      - diatChl
+      - diat_SiO3_lim_Cweight_avg_100m
+      - diaz_Nfix
+      - diaz_P_lim_Cweight_avg_100m
+      - diaz_Fe_lim_Cweight_avg_100m    
+      - diazC
+      - diazChl
+      - dust_REMIN
+      - Fe
+      - Fe_RIV_FLUX
+      - FG_CO2
+      - IRON_FLUX
+      - Jint_100m_DIC
+      - NO3
+      - PO4
+      - POC_FLUX_100m
+      - POP_FLUX_100m
+      - pfeToSed
+      - photoC_TOT_zint_100m
+      - photoC_sp_zint_100m
+      - photoC_diat_zint_100m
+      - photoC_diaz_zint_100m
+      - SALT  
+      - SiO3
+      - SiO2_FLUX_100m
+      - sp_P_lim_Cweight_avg_100m
+      - sp_Fe_lim_Cweight_avg_100m
+      - sp_N_lim_Cweight_avg_100m
+      - spC
+      - spChl
+      - TEMP
+      - DIA_IMPVF_DOC
+      - HDIFB_DOC
+      - WT_DOC  
+      - DIA_IMPVF_DOCr
+      - HDIFB_DOCr
+      - WT_DOCr
+    SSP1-2.6:
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m
+    SSP2-4.5:
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m
+    SSP3-7.0:
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m
+    SSP5-8.5:
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m
 
-# timeseries
-SSP1-2.6:
-  - FG_CO2
-  - ATM_CO2
-  - SST  
-  - photoC_TOT_zint_100m
-  - photoC_diat_zint_100m
-  - POC_FLUX_100m  
-SSP2-4.5:
-  - FG_CO2
-  - ATM_CO2
-  - SST  
-  - photoC_TOT_zint_100m
-  - photoC_diat_zint_100m
-  - POC_FLUX_100m  
-SSP3-7.0:
-  - FG_CO2
-  - ATM_CO2
-  - SST  
-  - photoC_TOT_zint_100m
-  - photoC_diat_zint_100m
-  - POC_FLUX_100m  
-SSP5-8.5:
-  - FG_CO2
-  - ATM_CO2
-  - SST
-  - photoC_TOT_zint_100m
-  - photoC_diat_zint_100m
-  - POC_FLUX_100m  
+timeseries:
+    historical:
+      - FG_CO2
+      - ATM_CO2
+      - SST  
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m  
+    SSP1-2.6:
+      - FG_CO2
+      - ATM_CO2
+      - SST  
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m  
+    SSP2-4.5:
+      - FG_CO2
+      - ATM_CO2
+      - SST  
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m  
+    SSP3-7.0:
+      - FG_CO2
+      - ATM_CO2
+      - SST  
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m  
+    SSP5-8.5:
+      - FG_CO2
+      - ATM_CO2
+      - SST
+      - photoC_TOT_zint_100m
+      - photoC_diat_zint_100m
+      - POC_FLUX_100m  
 
-# # slices
-# historical:
-#   - photoC_TOT_zint_100m
-#   - photoC_diat_zint_100m
-#   - POC_FLUX_100m
-# SSP1-2.6:
-#   - photoC_TOT_zint_100m
-#   - photoC_diat_zint_100m
-#   - POC_FLUX_100m
-# SSP2-4.5:
-#   - photoC_TOT_zint_100m
-#   - photoC_diat_zint_100m
-#   - POC_FLUX_100m
-# SSP3-7.0:
-#   - photoC_TOT_zint_100m
-#   - photoC_diat_zint_100m
-#   - POC_FLUX_100m
-# SSP5-8.5:
-#   - photoC_TOT_zint_100m
-#   - photoC_diat_zint_100m
-#   - POC_FLUX_100m
