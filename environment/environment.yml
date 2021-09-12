@@ -1,18 +1,17 @@
 name: cesm2-marbl
 channels:
 - conda-forge
-- defaults
 dependencies:
 - aiohttp
-- bokeh==1.4
+- bokeh
 - bottleneck
 - cartopy
 - cf_units
 - cftime=1.0.3.4
 - cmocean
-- dask==2.14
-- distributed==2.14
-- dask-jobqueue==0.7.1
+- dask
+- distributed
+- dask-jobqueue
 - dask-mpi
 - esmpy
 - fsspec
@@ -21,8 +20,12 @@ dependencies:
 - intake-xarray
 - ipywidgets
 - jupyter_contrib_nbextensions
+- jupyter-book
+- jupyter_client==6.1.12
 - jupyterlab
 - matplotlib
+- nbformat
+- nbterm
 - nc-time-axis
 - ncar-jobqueue
 - netcdf4
@@ -51,5 +54,4 @@ dependencies:
 - pip:
   - git+https://github.com/NCAR/esmlab.git
   - git+https://github.com/NCAR/esmlab-regrid.git
-  - git+https://github.com/NCAR/xpersist.git
   
