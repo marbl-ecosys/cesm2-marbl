@@ -7,35 +7,48 @@ import variable_defs
 with open('config.yml') as fid:
     config_dict = yaml.load(fid, Loader=yaml.Loader)
 
+_collections = config_dict['data_collections']
 
 def _get_experiment_sel_dict(experiment):
-    if experiment == 'historical':
-        return dict(time=slice('1990', '2014'))
-    elif 'SSP'  in experiment:
-        return dict(time=slice('2086', '2100'))        
-    else:
-        raise ValueError(f'no sel_dict setting for {experiment}')
+    return _collections['epoch_mean']['experiment'][experiment]
+#     if experiment == 'historical':
+#         return dict(time=slice('1990', '2014'))
+#     elif 'SSP'  in experiment:
+#         return dict(time=slice('2086', '2100'))        
+#     else:
+#         raise ValueError(f'no sel_dict setting for {experiment}')
 
-        
+
 @fn.register_query_dependent_op(
     query_keys=['experiment'],
 )
 def _mean_time_for_experiment(ds, experiment):
     """compute the mean over time"""
+    time_range = _collections['epoch_mean']['experiment'][experiment]
+    sel_dict = dict(time=slice(time_range[0], time_range[1]))
     return ops.mean_time(
         ds, 
-        sel_dict=_get_experiment_sel_dict(experiment),
+        sel_dict=sel_dict,
     )
 
 
-def epoch_mean(query, name='epoch_mean', center_time=True):
+def epoch_mean(query, name='epoch_mean', center_time=True, time_range=None):
     """Instantiate a `funnel.Collection` object for computing epoch means."""
-    postproccess = [_mean_time_for_experiment] 
-    postproccess_kwargs = [{}]    
     if center_time:
-        postproccess = [ops.center_time] + postproccess
-        postproccess_kwargs = [{}] + postproccess_kwargs
-
+        postproccess = [ops.center_time]
+        postproccess_kwargs = [{}]
+    else:
+        postproccess = []
+        postproccess_kwargs = []    
+           
+    if time_range is None:
+        postproccess += [_mean_time_for_experiment] 
+        postproccess_kwargs += [{}]    
+    else:
+        sel_dict = dict(time=slice(time_range[0], time_range[1]))
+        postproccess += [ops.mean_time] 
+        postproccess_kwargs += [dict(sel_dict=sel_dict)]            
+        
     return fn.Collection(
         name=name,
         esm_collection_json=config_dict['esm_collection'],

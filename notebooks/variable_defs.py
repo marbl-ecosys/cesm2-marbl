@@ -1,3 +1,4 @@
+from functools import partial
 import numpy as np
 import xarray as xr
 
@@ -214,3 +215,120 @@ def derive_var_DOPt(ds):
     ds.DOPt.attrs['long_name'] = 'Dissolved Organic Phosphorus (total)'
     ds.DOPt.encoding = ds.DOP.encoding
     return ds.drop(['DOP', 'DOPr'])
+
+
+@fn.register_derived_var(
+    varname='Omega_calc', 
+    dependent_vars=['CO3', 'co3_sat_calc'],
+)
+def derive_var_Omega_calc(ds):
+    """compute Omega calcite"""
+    ds['Omega_calc'] = ds['CO3'] / ds['co3_sat_calc']
+    ds.Omega_calc.attrs = ds.CO3.attrs
+    ds.Omega_calc.attrs['long_name'] = '$\Omega_{calc}$'
+    ds.Omega_calc.attrs['units'] = ''    
+    ds.Omega_calc.encoding = ds.CO3.encoding
+    return ds.drop(['CO3', 'co3_sat_calc'])
+
+
+@fn.register_derived_var(
+    varname='Omega_arag', 
+    dependent_vars=['CO3', 'co3_sat_arag'],
+)
+def derive_var_Omega_arag(ds):
+    """compute Omega aragonite"""
+    ds['Omega_arag'] = ds['CO3'] / ds['co3_sat_arag']
+    ds.Omega_arag.attrs = ds.CO3.attrs
+    ds.Omega_arag.attrs['long_name'] = '$\Omega_{arag}$'
+    ds.Omega_arag.attrs['units'] = ''        
+    ds.Omega_arag.encoding = ds.CO3.encoding    
+    return ds.drop(['CO3', 'co3_sat_arag'])
+
+
+
+def snormalize(X, S, Sbar=35.):
+    """compute salinity normalized tracer values"""
+    return X * Sbar / S
+
+
+@fn.register_derived_var(
+    varname='sDIC', 
+    dependent_vars=['DIC', 'SALT'],
+)
+def derive_var_sDIC(ds):
+    """compute salinity normalized DIC"""
+    ds['sDIC'] = snormalize(ds.DIC, ds.SALT, 35.)
+    ds.sDIC.attrs = ds.DIC.attrs
+    ds.sDIC.attrs['long_name'] = 'DIC (salinity normalized)'
+    ds.sDIC.encoding = ds.DIC.encoding
+    return ds.drop(['DIC', 'SALT'])
+
+
+@fn.register_derived_var(
+    varname='sALK', 
+    dependent_vars=['ALK', 'SALT'],
+)
+def derive_var_sALK(ds):
+    """compute salinity normalized ALK"""
+    ds['sALK'] = snormalize(ds.ALK, ds.SALT, 35.)
+    ds.sALK.attrs = ds.ALK.attrs
+    ds.sALK.attrs['long_name'] = 'ALK (salinity normalized)'
+    ds.sALK.encoding = ds.ALK.encoding
+    return ds.drop(['ALK', 'SALT'])
+
+
+@fn.register_derived_var(
+    varname='zoo_prod_zint_100m', 
+    dependent_vars=['graze_diat_zoo_zint_100m',
+                    'graze_diaz_zoo_zint_100m',
+                    'graze_sp_zoo_zint_100m',],
+)
+def derive_var_zoo_prod_zint_100m(ds):
+    ds['zoo_prod_zint_100m'] = (
+        ds.graze_diat_zoo_zint_100m + 
+        ds.graze_diaz_zoo_zint_100m +
+        ds.graze_sp_zoo_zint_100m 
+    )
+    ds.zoo_prod_zint_100m.attrs = ds.graze_diat_zoo_zint_100m.attrs
+    ds.zoo_prod_zint_100m.attrs['long_name'] = 'Zooplankton production'
+    ds.zoo_prod_zint_100m.encoding = ds.graze_diat_zoo_zint_100m.encoding
+    return ds.drop([
+        'graze_diat_zoo_zint_100m',
+        'graze_diaz_zoo_zint_100m',
+        'graze_sp_zoo_zint_100m',
+    ])
+        
+
+def compute_zint(ds, varname, depth_slice=None):
+    """compute vertical integral over `depth_slice`"""
+    da = ds[varname]
+    with xr.set_options(keep_attrs=True):
+        if 'z_t' in da.dims:            
+            dz = ds.dz
+            if depth_slice is not None:
+                dao = (dz * da).sel(z_t=depth_slice).sum('z_t')
+            else:
+                dao = (dz * da).sum('z_t')
+        
+        elif 'z_t_150m' in da.dims:
+            dz = ds.dz.isel(z_t=slice(0, 15)).rename({'z_t': 'z_t_150m'})            
+            if depth_slice is not None:            
+                dao = (dz * da).sel(z_t_150m=depth_slice).sum('z_t_150m')
+            else:
+                dao = (dz * da).sum('z_t_150m')                
+    dao.attrs['units'] = da.attrs['units'] + ' cm'
+    ds[f'{varname}_zint'] = dao
+    return ds.drop([varname])
+    
+    
+def compute_zint_100m(ds, varname):
+    """compute integral over top 100 m"""
+    return compute_zint(
+        ds, varname, depth_slice=slice(0, 100e2)
+    ).rename({f'{varname}_zint': f'{varname}_zint_100m'})
+
+
+# register vertical integrals for PFTs
+for v in ['sp', 'diat', 'diaz', 'zoo']:
+    func = partial(compute_zint_100m, varname=f'{v}C')
+    fn.register_derived_var(func, varname=f'{v}C_zint_100m', dependent_vars=[f'{v}C'])

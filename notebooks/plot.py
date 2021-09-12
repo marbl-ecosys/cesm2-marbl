@@ -23,6 +23,8 @@ long_name = dict(
     POP_FLUX_100m='POP export',
     SiO2_FLUX_100m='Opal export',
     CaCO3_FLUX_100m='CaCO3 export',
+    sDIC='sDIC',
+    sALK='sAlk',    
 )
 units = dict(
     Cant='mmol m$^{-3}$',
@@ -30,7 +32,9 @@ units = dict(
     Cant_v1pGruber2019='mmol m$^{-3}$',    
     pCFC11='patm',
     pCFC12='patm',
-    Del14C='‰',    
+    Del14C='‰',
+    sDIC='mmol m$^{-3}$',
+    sALK='meq m$^{-3}$',
 )
 
 
@@ -174,15 +178,23 @@ def za_obs_comparison(ds_zonal_mean, field, levels, levels_bias, col_name):
 
 
     
-def nice_levels(da, max_steps=30, outside=False):
+def nice_levels(da, max_steps=30, outside=False, percentile=[0., 100.]):
     """
     Return nice contour levels
     outside indicates whether the contour should be inside or outside the bounds
     """
     import sys
     
-    cmin = da.min()
-    cmax = da.max()
+    if percentile[0] == 0.:
+        cmin = da.min()
+    else:
+        cmin = np.nanpercentile(da, percentile[0])
+    
+    if percentile[1] == 100.:
+        cmax = da.max()
+    else:
+        cmax = np.nanpercentile(da, percentile[1])    
+
     
     table = [1., 2., 2.5, 4., 5., 10., 20., 25., 40., 50.,
              100., 200., 250., 400., 500.]
@@ -319,3 +331,14 @@ def moc(MOC):
         ax_deep.set_xticklabels('')
 
     utils.label_plots(fig, [ax for ax in axs_surf] , xoff=-0.02, yoff=0.06)    
+
+    
+def tick_format(n: float, digits=None):
+    if digits is None:
+        digits = 5
+    s = f'%.{digits}f' % n
+    s += '.' if '.' not in s else ''
+    if s[-1] == '0':
+        return tick_format(n, digits=digits-1)
+    else:
+        return s[:-1] if s[-1] == '.' else s

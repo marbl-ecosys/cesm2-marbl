@@ -1,0 +1,15 @@
+asset: /glade/p/cgd/oce/projects/cesm2-marbl/funnel/c2215081615a3df48ca178ffbd4f654d.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h
+name: epoch_mean
+operator_kwargs:
+- {}
+- {}
+operators:
+- center_time
+- _mean_time_for_experiment
+preprocess: null
+query:
+  experiment: historical
+  stream: pop.h
+variable: diatC_zint_100m
