@@ -4,6 +4,9 @@ historical_1990-2015:
   - ALK
   - CFC11
   - CFC12  
+  - CO3
+  - co3_sat_arag
+  - co3_sat_calc  
   - DIC
   - DIC_ALT_CO2
   - NO3
