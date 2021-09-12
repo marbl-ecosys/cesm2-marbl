@@ -22,3 +22,18 @@ notebooks:
       - Fe-comparison
       - transient-fgco2
       - transient-biological-pump
+
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+cache_dir: /glade/p/cgd/oce/projects/cesm2-marbl/funnel
+data_collections:
+    epoch_mean:
+        experiment:
+           historical: ['1990', '2014']
+           SSP5-RCP8.5: ['2086', '2100']
+           SSP1-2.6: ['2086', '2100']
+           SSP2-4.5: ['2086', '2100']
+           SSP3-7.0: ['2086', '2100']
+           SSP5-8.5: ['2086', '2100']
+    global_mean_timeseries_ann: 
+    global_integral_timeseries_ann:
+      
