@@ -8,26 +8,40 @@ historical_1990-2015:
   - CO3
   - co3_sat_arag
   - co3_sat_calc  
+  - DENITRIF
   - DIC
   - DIC_ALT_CO2
+  - DOC
+  - DOCr
+  - DON
+  - DONr
+  - DOP
+  - DOPr  
   - diat_P_lim_Cweight_avg_100m
   - diat_Fe_lim_Cweight_avg_100m
   - diat_N_lim_Cweight_avg_100m
   - diatC
   - diatChl
   - diat_SiO3_lim_Cweight_avg_100m
+  - diaz_Nfix
   - diaz_P_lim_Cweight_avg_100m
   - diaz_Fe_lim_Cweight_avg_100m    
   - diazC
   - diazChl
+  - dust_REMIN
+  - Fe
+  - Fe_RIV_FLUX
+  - FG_CO2
   - graze_diat_zoo_zint_100m
   - graze_diaz_zoo_zint_100m
   - graze_sp_zoo_zint_100m
+  - IRON_FLUX
   - Jint_100m_DIC
   - NO3
   - PO4
   - POC_FLUX_100m
   - POP_FLUX_100m
+  - pfeToSed
   - photoC_TOT_zint_100m
   - photoC_sp_zint_100m
   - photoC_diat_zint_100m
