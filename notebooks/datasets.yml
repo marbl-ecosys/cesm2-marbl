@@ -2,6 +2,7 @@ historical_1990-2015:
   - ABIO_DIC14
   - ABIO_DIC
   - ALK
+  - CaCO3_FLUX_100m
   - CFC11
   - CFC12  
   - CO3
@@ -17,10 +18,15 @@ historical_1990-2015:
   - diaz_P_lim_Cweight_avg_100m
   - diaz_Fe_lim_Cweight_avg_100m    
   - diazChl
+  - Jint_100m_DIC
   - NO3
   - PO4
+  - POC_FLUX_100m
+  - POP_FLUX_100m
+  - photoC_TOT_zint_100m
   - SALT  
   - SiO3
+  - SiO2_FLUX_100m
   - sp_P_lim_Cweight_avg_100m
   - sp_Fe_lim_Cweight_avg_100m
   - sp_N_lim_Cweight_avg_100m
