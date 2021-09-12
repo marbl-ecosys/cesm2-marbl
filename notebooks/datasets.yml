@@ -12,9 +12,11 @@ historical_1990-2015:
   - diat_P_lim_Cweight_avg_100m
   - diat_Fe_lim_Cweight_avg_100m
   - diat_N_lim_Cweight_avg_100m
+  - diatChl
   - diat_SiO3_lim_Cweight_avg_100m
   - diaz_P_lim_Cweight_avg_100m
   - diaz_Fe_lim_Cweight_avg_100m    
+  - diazChl
   - NO3
   - PO4
   - SALT  
@@ -22,5 +24,6 @@ historical_1990-2015:
   - sp_P_lim_Cweight_avg_100m
   - sp_Fe_lim_Cweight_avg_100m
   - sp_N_lim_Cweight_avg_100m
+  - spChl
   - TEMP
 
