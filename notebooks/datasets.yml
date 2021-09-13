@@ -1,4 +1,4 @@
-epoch_mean:
+epoch_mean: # compute mean over 25 years, mostly monthly data
     historical:
       - ABIO_DIC14
       - ABIO_DIC
@@ -53,7 +53,7 @@ epoch_mean:
       - spC
       - spChl
       - TEMP
-      - DIA_IMPVF_DOC
+      - DIA_IMPVF_DOC # these are annual
       - HDIFB_DOC
       - WT_DOC  
       - DIA_IMPVF_DOCr
@@ -76,7 +76,7 @@ epoch_mean:
       - photoC_diat_zint_100m
       - POC_FLUX_100m
 
-timeseries:
+timeseries: # compute global mean timeseries from monthly data
     historical:
       - FG_CO2
       - ATM_CO2
