@@ -106,6 +106,24 @@ Parameters :
 #     autotroph_settings(3)%kSiO3 :
 #         label : $K_\mathrm{diaz}^{\ce{SiO3}}$
 #         description_suffix : for diazotrophs
+    autotroph_settings(1)%mort_per_day :
+        label : $m_i$
+        description_suffix : for all phytoplankton
+#     autotroph_settings(2)%mort_per_day :
+#         label : $m_\mathrm{diat}$
+#         description_suffix : for diatoms
+#     autotroph_settings(3)%mort_per_day :
+#         label : $m_\mathrm{diaz}$
+#         description_suffix : for diazotrophs
+    autotroph_settings(1)%mort2_per_day :
+        label : $a_i$
+        description_suffix : for all phytoplankton
+#     autotroph_settings(2)%mort2_per_day :
+#         label : $a_\mathrm{diat}$
+#         description_suffix : for diatoms
+#     autotroph_settings(3)%mort2_per_day :
+#         label : $a_\mathrm{diaz}$
+#         description_suffix : for diazotrophs
     autotroph_settings(1)%agg_rate_min :
         label : $a_\mathrm{sp}^{min}$
         description_suffix : for small phytoplankton
@@ -116,14 +134,14 @@ Parameters :
         label : $a_\mathrm{diaz}^{min}$
         description_suffix : for diazotrophs
     autotroph_settings(1)%agg_rate_max :
-        label : $a_\mathrm{sp}^{max}$
-        description_suffix : for small phytoplankton
-    autotroph_settings(2)%agg_rate_max :
-        label : $a_\mathrm{diat}^{max}$
-        description_suffix : for diatoms
-    autotroph_settings(3)%agg_rate_max :
-        label : $a_\mathrm{diaz}^{max}$
-        description_suffix : for diazotrophs
+        label : $a_i^{max}$
+        description_suffix : for all phytoplankton
+#     autotroph_settings(2)%agg_rate_max :
+#         label : $a_\mathrm{diat}^{max}$
+#         description_suffix : for diatoms
+#     autotroph_settings(3)%agg_rate_max :
+#         label : $a_\mathrm{diaz}^{max}$
+#         description_suffix : for diazotrophs
     grazing_relationship_settings(1,1)%z_umax_0_per_day :
         label : $g_\mathrm{sp}^{max}$
         description : Maximum grazing rate
