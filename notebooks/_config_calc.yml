@@ -4,7 +4,7 @@ notebooks:
       - _data-Ncycle
       - _data-nutrient-plots
       - _data-compute-obs-mld
-      - _data-co2-flux-obs
+      - _data-fgco2-obs
 
     main:
       - mld
