@@ -1,0 +1,12 @@
+asset: /glade/scratch/mclong/cesm2-marbl-archive/f8910dcac95ce51b9199b6db376ebed0.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h
+name: epoch_mean
+operator_kwargs:
+- {}
+- {}
+operators:
+- center_time
+- _mean_time_for_experiment
+preprocess: null
+variable: DOP

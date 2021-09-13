@@ -76,39 +76,47 @@ epoch_mean: # compute mean over 25 years, mostly monthly data
       - photoC_diat_zint_100m
       - POC_FLUX_100m
 
-timeseries: # compute global mean timeseries from monthly data
+
+global_mean_timeseries_ann: # compute global mean timeseries from monthly data
     historical:
-      - FG_CO2
       - ATM_CO2
       - SST  
+    SSP1-2.6:
+      - ATM_CO2
+      - SST  
+    SSP2-4.5:
+      - ATM_CO2
+      - SST  
+    SSP3-7.0:
+      - ATM_CO2
+      - SST  
+    SSP5-8.5:
+      - ATM_CO2
+      - SST  
+
+global_integral_timeseries_ann: # compute global mean timeseries from monthly data
+    historical:
+      - FG_CO2
       - photoC_TOT_zint_100m
       - photoC_diat_zint_100m
       - POC_FLUX_100m  
     SSP1-2.6:
       - FG_CO2
-      - ATM_CO2
-      - SST  
       - photoC_TOT_zint_100m
       - photoC_diat_zint_100m
       - POC_FLUX_100m  
     SSP2-4.5:
       - FG_CO2
-      - ATM_CO2
-      - SST  
       - photoC_TOT_zint_100m
       - photoC_diat_zint_100m
       - POC_FLUX_100m  
     SSP3-7.0:
       - FG_CO2
-      - ATM_CO2
-      - SST  
       - photoC_TOT_zint_100m
       - photoC_diat_zint_100m
       - POC_FLUX_100m  
     SSP5-8.5:
       - FG_CO2
-      - ATM_CO2
-      - SST
       - photoC_TOT_zint_100m
       - photoC_diat_zint_100m
       - POC_FLUX_100m  

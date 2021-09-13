@@ -1,22 +1,36 @@
+import os
+from jinja2 import Template
 import yaml
 
 import funnel as fn
 import operators as ops
 import variable_defs
 
-with open('_config_calc.yml') as fid:
-    config_dict = yaml.load(fid, Loader=yaml.Loader)
 
-_collections = config_dict['data_collections']
+def get_config_dict():
+    """return the configuration dictionary with environment variables replaced"""
+    
+    with open('_config_calc.yml') as fid:
+        config_dict_in = yaml.safe_load(fid)    
+    
+    required_keys = ['esm_collection', 'data_collections', 'cache_dir']
+    for key in required_keys:
+        assert key in config_dict_in, f'config missing {key}'
+        
+    config_dict = {}
+    for key, value in config_dict_in.items():
+        if isinstance(value, str):
+            t = Template(value)
+            config_dict[key] = t.render(env=os.environ)
+        else:
+            config_dict[key] = value
+    return config_dict
 
-def _get_experiment_sel_dict(experiment):
-    return _collections['epoch_mean']['experiment'][experiment]
-#     if experiment == 'historical':
-#         return dict(time=slice('1990', '2014'))
-#     elif 'SSP'  in experiment:
-#         return dict(time=slice('2086', '2100'))        
-#     else:
-#         raise ValueError(f'no sel_dict setting for {experiment}')
+
+
+config_dict = get_config_dict()
+_collections_settings = config_dict['data_collections']
+esm_collection_json = config_dict['esm_collection']
 
 
 @fn.register_query_dependent_op(
@@ -24,7 +38,7 @@ def _get_experiment_sel_dict(experiment):
 )
 def _mean_time_for_experiment(ds, experiment):
     """compute the mean over time"""
-    time_range = _collections['epoch_mean']['experiment'][experiment]
+    time_range = _collections_settings['epoch_mean']['experiment'][experiment]
     sel_dict = dict(time=slice(time_range[0], time_range[1]))
     return ops.mean_time(
         ds, 
@@ -51,7 +65,7 @@ def epoch_mean(query, name='epoch_mean', center_time=True, time_range=None):
         
     return fn.Collection(
         name=name,
-        esm_collection_json=config_dict['esm_collection'],
+        esm_collection_json=esm_collection_json,
         postproccess=postproccess,  
         postproccess_kwargs=postproccess_kwargs,
         query=query,
@@ -77,7 +91,7 @@ def global_mean_timeseries_ann(query, name='global_mean_timeseries_ann',
 
     return fn.Collection(
         name=name,
-        esm_collection_json=config_dict['esm_collection'],
+        esm_collection_json=esm_collection_json,
         postproccess=postproccess,  
         postproccess_kwargs=postproccess_kwargs,
         query=query,
@@ -86,7 +100,7 @@ def global_mean_timeseries_ann(query, name='global_mean_timeseries_ann',
         cdf_kwargs=dict(chunks={'time': 4}, decode_coords=False), 
     )    
 
-def global_integral_timeseries_ann(query, name='global_mean_timeseries_ann',
+def global_integral_timeseries_ann(query, name='global_integral_timeseries_ann',
                                center_time=True):
     """
     Instantiate a `funnel.Collection` object for computing 
@@ -102,7 +116,7 @@ def global_integral_timeseries_ann(query, name='global_mean_timeseries_ann',
 
     return fn.Collection(
         name=name,
-        esm_collection_json=config_dict['esm_collection'],
+        esm_collection_json=esm_collection_json,
         postproccess=postproccess,  
         postproccess_kwargs=postproccess_kwargs,
         query=query,

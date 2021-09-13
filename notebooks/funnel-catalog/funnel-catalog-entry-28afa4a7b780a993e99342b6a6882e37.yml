@@ -1,0 +1,16 @@
+asset: /glade/scratch/mclong/cesm2-marbl-archive/28afa4a7b780a993e99342b6a6882e37.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.historical.pop.h
+name: epoch_mean
+operator_kwargs:
+- {}
+- sel_dict:
+    time: !!python/object/apply:builtins.slice
+    - '2002-01-15'
+    - '2003-01-15'
+    - null
+operators:
+- center_time
+- mean_time
+preprocess: null
+variable: Omega_arag

@@ -1,0 +1,15 @@
+asset: /glade/scratch/mclong/cesm2-marbl-archive/bdec101ea84034f34347025367c2210e.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.SSP3-7.0.pop.h
+name: global_mean_timeseries_ann
+operator_kwargs:
+- {}
+- include_ms: false
+  normalize: true
+- {}
+operators:
+- center_time
+- global_mean
+- resample_ann
+preprocess: null
+variable: SST

@@ -187,14 +187,16 @@ def main(run_pre, notebook, stop_on_fail):
 
         # run the notebook
         ok = nb_execute(nb, output_dir=cwd)
+        
+        # set the kernel back
+        nb_set_kernelname(nb, kernel_name=kernel_munge(project_kernel))
+        
         if not ok:
             print('failed')
             if stop_on_fail:
                 sys.exit(1)            
             failed_list.append(nb)
-
-        # set the kernel back
-        nb_set_kernelname(nb, kernel_name=kernel_munge(project_kernel))
+        
         print()
         
     if failed_list:

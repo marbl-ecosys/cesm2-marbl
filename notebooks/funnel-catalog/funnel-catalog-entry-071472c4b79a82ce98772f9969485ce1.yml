@@ -1,0 +1,15 @@
+asset: /glade/scratch/mclong/cesm2-marbl-archive/071472c4b79a82ce98772f9969485ce1.nc
+esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+key: ocn.SSP5-8.5.pop.h
+name: global_integral_timeseries_ann
+operator_kwargs:
+- {}
+- include_ms: false
+  normalize: false
+- {}
+operators:
+- center_time
+- global_mean
+- resample_ann
+preprocess: null
+variable: photoC_TOT_zint_100m

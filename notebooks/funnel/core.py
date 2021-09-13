@@ -3,6 +3,8 @@ from glob import glob
 import shutil
 import pprint
 
+from itertools import product
+
 import traceback
 import warnings
 import json 
@@ -10,12 +12,13 @@ import yaml
 
 import intake
 
+import pandas as pd
 import dask
 import xarray as xr
 
 from toolz import curry
 
-from . config import cache_catalog_dir, cache_catalog_prefix
+from . config import cache_catalog_dir, cache_catalog_prefix, cache_format
 from . registry import _DERIVED_VAR_REGISTRY, _QUERY_DEPENDENT_OP_REGISTRY
 
 os.makedirs(cache_catalog_dir, exist_ok=True)
@@ -55,10 +58,7 @@ class Collection(object):
        
     cache_dir : str, optional
        Directory for storing cache files.
-       
-    cache_format : str
-       Format in which to store cache files; can be "nc" or "zarr"
-       
+             
     kwargs : dict
        Defaults for keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`.
        (Note: these can be updated/overridden for each call to self.dsets below.)
@@ -71,7 +71,6 @@ class Collection(object):
                  postproccess_kwargs=[], 
                  persist=False,
                  cache_dir='.', 
-                 cache_format='nc',    
                  **kwargs,
                 ):
        
@@ -85,7 +84,24 @@ class Collection(object):
     
         # TODO: accept multiple catalogs and concatenate them into one?
         self.catalog = intake.open_esm_datastore(esm_collection_json).search(**query)
-    
+        
+        # make the assumption that the catalog.keys() provides a means of uniquely
+        # identifying datasets within the catalog. This assumption is valid if
+        # the user only constructs searches using the `groupby_attrs` columns,
+        # so here we check to ensure this is the case.
+        # TODO: an extension of this framework could strip out the `groupby_attrs`
+        #       fields from the query and track the other keys of the query.
+        #       For example, the user might include `date_range` in their query,
+        #       which could truncate the time axis of the resulting datasets---
+        #       but wouldn't change the keys: i.e. datasets with the same "key" might
+        #       differ based on the fields of the `query` other than the `groupby_attrs`. 
+        with open(esm_collection_json) as fid:
+            catalog_def = json.load(fid)
+        groupby_attrs = catalog_def['aggregation_control']['groupby_attrs']        
+        assert not (set(query.keys()) - set(groupby_attrs)), (
+            f'queries can only include the following fields: {groupby_attrs}'
+        )
+                    
         # setup cache info
         assert cache_format in ['nc', 'zarr'], f'unsupported format {cache_format}'             
         self._format = cache_format        
@@ -121,12 +137,11 @@ class Collection(object):
         self.origins_dict = dict(
             name=name,
             esm_collection=esm_collection_json, 
-            query=query, 
             preprocess=preprocess_name,
             operators=[op.__name__ for op in self.operators],
             operator_kwargs=self.ops_kwargs,
         )                
-        
+
         # assemble database of existing cache's
         self._assemble_cache_db()
         
@@ -153,77 +168,22 @@ class Collection(object):
                     if k in cache_id
                 }
                 if cache_origins_dict == self.origins_dict:
-                    variable = cache_id['variable']
-                    key = cache_id['key']
-                    if variable not in self._cache_files:
-                        self._cache_files[variable] = {}                        
-                    self._cache_files[variable][key] = cache_id['asset']
-            
-    def to_dataset_dict(self, variable, compute=True, clobber=False, 
-                        prefer_derived=False, **kwargs):
-        """
-        Get dataset_dicts for assets.
-        
-        Parameters
-        ----------
-        
-        variable : str or list
-          The variable or list of variables to read and process.
-          
-        compute : bool, optional (default=True)
-          Specify whether to call compute on the final datasets.
-          
-        clobber : bool, optional (default=False)
-          Remove and recreate any existing cache.
-          
-        kwargs : dict, optional 
-          Keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`
-        
-        """
-        
-        # TODO: `variable` could be more flexible, 
-        # i.e. it could be a query dict with a require "variable" key
-        
-        if isinstance(variable, list):
-            dsets_list = [
-                self.to_dataset_dict(v, compute, clobber, prefer_derived, **kwargs) 
-                for v in variable
-            ]
-            keys = list(set([k for dsets in dsets_list for k in dsets.keys()]))
-            dsets_merged = {}
-            for key in keys:
-                ds_list = []
-                for dsets in dsets_list:                    
-                    if key in dsets:
-                        ds_list.append(dsets[key])
-                dsets_merged[key] = xr.merge(ds_list)
-            return dsets_merged        
-        
-        # TODO: check for lock file, wait if present        
-        if self._cache_exists(variable, clobber):
-            return self._read_cache(variable)
-        
-        else:
-            # TODO: set lock file
-            to_dsets_kwargs = kwargs.copy()
-            to_dsets_kwargs.update(self._to_dsets_kwargs_defaults)            
-            # TODO: optionally spin up a cluster here
-            return self._generate_dsets(
-                variable, compute, prefer_derived, **to_dsets_kwargs
-            )
-            # TODO: release lock
-        
-    def _generate_dsets(self, variable, compute, prefer_derived, **kwargs):
-        """Do the computation necessary to make `dsets`"""
-        
-        # check for variable in catalog
-        # TODO: we're handling empty results below: 
-        #       suppress intake-esm warning or change logic
-        catalog_subset_var = self.catalog.search(variable=variable)            
+                    if not os.path.exists(cache_id['asset']):
+                        print(f'missing: {cache_id["asset"]}')
+                        continue
+                    token = self._gen_cache_token(
+                        cache_id['key'],                        
+                        cache_id['variable'],
+                    )
+                    self._cache_files[token] = cache_id['asset']
+
+    def _catalog_subset(self, variable, prefer_derived, refine_query):
+        """apply query to catalog, determine if variable is derived"""
+        catalog_subset_var = self.catalog.search(variable=variable, **refine_query)            
 
         # check for variable in derived registry
         is_derived = variable in _DERIVED_VAR_REGISTRY
-    
+
         if len(catalog_subset_var):
             if is_derived and not prefer_derived:
                 warnings.warn(
@@ -237,88 +197,157 @@ class Collection(object):
         if is_derived:
             derived_var_obj = _DERIVED_VAR_REGISTRY[variable]
             query_vars = derived_var_obj.dependent_vars
-            catalog_subset_var = self.catalog.search(variable=query_vars)
+            catalog_subset_var = self.catalog.search(variable=query_vars, **refine_query)
+        
+        return catalog_subset_var, is_derived
+    
+    def to_dataset_dict(self, variable, clobber=False, 
+                        prefer_derived=False, refine_query={}, **kwargs):
+        """
+        Get dataset_dicts for assets.
+        
+        Parameters
+        ----------
+        
+        variable : str or list
+          The variable or list of variables to read and process.
+          
+        prefer_derived : bool, optional (default=False)
+           Specify whether to use a "derived variable" regardless if 
+           a variable by the same name is found in the catalog.
+    
+        refine_query : dict, optional
+          Additional arguments to refine catalog search.
+          
+        clobber : bool, optional (default=False)
+          Remove and recreate any existing cache.
+          
+        kwargs : dict, optional 
+          Keyword arguments to pass to `intake_esm.core.esm_datastore.to_dataset_dict`
+        
+        """
+       
+        if isinstance(variable, list):
+            dsets_list = [
+                self.to_dataset_dict(v, clobber, prefer_derived, refine_query, **kwargs) 
+                for v in variable
+            ]
+            keys = list(set([k for dsets in dsets_list for k in dsets.keys()]))
+            dsets_merged = {}
+            for key in keys:
+                ds_list = []
+                for dsets in dsets_list:                    
+                    if key in dsets:
+                        ds_list.append(dsets[key])
+                dsets_merged[key] = xr.merge(ds_list, compat='override')
+            return dsets_merged        
+        
+        catalog_subset_var, is_derived = self._catalog_subset(variable, prefer_derived, refine_query)        
+        catalog_keys = catalog_subset_var.keys()
+        key_info = intake_esm_get_keys_info(catalog_subset_var)
 
-        dsets = catalog_subset_var.to_dataset_dict(**kwargs)
-        key_info = _intake_esm_get_keys_info(catalog_subset_var)
+        dsets = {}
+        for key in catalog_keys:
+            # TODO: check for lock file, wait if present        
+            if self._cache_exists(key, variable, clobber):        
+                dsets[key] = self._read_cache(key, variable)
+            else:                
+                to_dsets_kwargs = kwargs.copy()
+                to_dsets_kwargs.update(self._to_dsets_kwargs_defaults)            
+                
+                # TODO: set lock file                
+                #       optionally spin up a cluster here
+                dsets[key] = self._generate_dset(
+                    key, variable, is_derived, catalog_subset_var, key_info, **to_dsets_kwargs
+                )
+                # TODO: release lock
+        return dsets
+    
+    def _generate_dset(self, key, variable, is_derived, catalog_subset_var, key_info, **kwargs):
+        """Do the computation necessary to make `dsets`"""
+        
+        dset = catalog_subset_var.search(**key_info[key]).to_dataset_dict(**kwargs)      
+        assert len(dset.keys()) == 1, (
+            f'expecting a single key ({key})\nfound the following: {dset.keys()}'
+        )
+        assert list(dset.keys())[0] == key, (
+            f'mismatch in key:\nexpecting {key}\ngot: {dset.keys()}'
+        )
+        
+        _, ds = dset.popitem()
         
         if is_derived:
-            for key, ds in dsets.items():
-                dsets[key] = derived_var_obj(ds)
+            derived_var_obj = _DERIVED_VAR_REGISTRY[variable]
+            ds = derived_var_obj(ds)
 
-        for key in dsets.keys():
-            for op, kw in zip(self.operators, self.ops_kwargs):
-                if hash(op) in _QUERY_DEPENDENT_OP_REGISTRY:
-                    op_obj = _QUERY_DEPENDENT_OP_REGISTRY[hash(op)]             
-                    dsets[key] = op_obj(
-                        dsets[key], 
-                        query_dict=key_info[key],
-                        **kw,
-                    )
-                else:
-                    dsets[key] = op(dsets[key], **kw)
-
-        if compute:
-            dsets = {k: ds.compute() for k, ds in dsets.items()}
+        for op, kw in zip(self.operators, self.ops_kwargs):
+            if hash(op) in _QUERY_DEPENDENT_OP_REGISTRY:
+                op_obj = _QUERY_DEPENDENT_OP_REGISTRY[hash(op)] 
+                query_dict = dict(**key_info[key])
+                query_dict['variable'] = variable
+                ds = op_obj(
+                    ds, 
+                    query_dict=query_dict,
+                    **kw,
+                )
+            else:
+                ds = op(ds, **kw)
 
         if self.persist:
-            self._make_cache(dsets, variable)
+            self._make_cache(ds, key, variable)
 
-        return dsets  
+        return ds
     
-    def _make_cache(self, dsets, variable):
+    def _make_cache(self, ds, key, variable):
         """write cache file"""
         
-        cache_files = {variable: {}}
-        for key, ds in dsets.items():
-            
-            cache_id_dict = self.origins_dict.copy()
-            cache_id_dict['key'] = key
-            cache_id_dict['variable'] = variable
-            cache_id_dict['asset'] = self._gen_cache_file_name(key, variable)
-            
-            cache_id_file = self._gen_cache_id_file_name(key, variable)
-            
-            if self._format == 'nc':
-                ds.to_netcdf(cache_id_dict['asset'])
-            elif self._format == 'zarr':
-                ds.to_zarr(cache_id_dict['asset'], mode='w', consolidated=True)
-            
-            with open(cache_id_file, 'w') as fid:
-                yaml.dump(cache_id_dict, fid)
-            
-            cache_files[variable][key] = cache_id_dict['asset']
-            
-        self._cache_files.update(cache_files)
+        token = self._gen_cache_token(key, variable)
         
-    def _read_cache(self, variable):            
-        """read cache files"""
-        dsets = {}
-        for key, asset in self._cache_files[variable].items():
-            if self._format == 'nc':
-                with xr.open_dataset(asset, **self._open_cache_kwargs) as ds:
-                    dsets[key] = ds
-            elif self._format == 'zarr':
-                with xr.open_zarr(asset, **self._open_cache_kwargs) as ds:
-                    dsets[key] = ds
-        return dsets
+        cache_id_dict = self.origins_dict.copy()
+        cache_id_dict['key'] = key
+        cache_id_dict['variable'] = variable
+        cache_id_dict['asset'] = self._gen_cache_file_name(key, variable)        
+        if self._format == 'nc':
+            ds.to_netcdf(cache_id_dict['asset'])            
+        elif self._format == 'zarr':
+            ds.to_zarr(cache_id_dict['asset'], mode='w', consolidated=True)
 
-    def _cache_exists(self, variable, clobber):        
+        cache_id_file = self._gen_cache_id_file_name(key, variable)            
+        with open(cache_id_file, 'w') as fid:
+            yaml.dump(cache_id_dict, fid)
+
+        self._cache_files[token] = cache_id_dict['asset']
+                    
+    def _read_cache(self, key, variable):            
+        """read cache files"""
+        token = self._gen_cache_token(key, variable)
+        asset = self._cache_files[token]        
+        if self._format == 'nc':
+            with xr.open_dataset(asset, **self._open_cache_kwargs) as ds:
+                return ds
+        elif self._format == 'zarr':
+            with xr.open_zarr(asset, **self._open_cache_kwargs) as ds:
+                return ds
+
+    def _cache_exists(self, key, variable, clobber):        
         """determine if cache files exist (or clobber them)"""
+        # assemble database of existing cache's
+        self._assemble_cache_db()        
         
-        if variable in self._cache_files:
+        token = self._gen_cache_token(key, variable)                
+        if token not in self._cache_files:
+            return False
+        
+        asset = self._cache_files[token]            
+        if os.path.exists(asset):
             if clobber:
-                for asset in self._cache_files[variable].values():
-                    if os.path.exists(asset):
-                        self._remove_asset(asset)
+                self._remove_asset(asset)
                 return False
             else:
-                return all(
-                    [os.path.exists(asset) for asset in self._cache_files[variable].values()]
-                )
+                return True
         else:
             return False
-    
+        
     def _remove_asset(self, asset):
         """delete asset from disk"""
         if not os.path.exists(asset):
@@ -327,24 +356,27 @@ class Collection(object):
             os.remove(asset)
         elif self._format == 'zarr':
             shutil.rmtree(asset)
+    
+    def _gen_cache_token(self, key, variable):
+        return dask.base.tokenize(self.origins_dict, key, variable)
         
     def _gen_cache_file_name(self, key, variable):
         """generate a file cache name"""
         # TODO: accept a user-provided callable to generate human-readable
         #       file name
-        token = dask.base.tokenize(self.origins_dict, key, variable)
-        return f'{self.cache_dir}/{token}.{self._format}'
+        token_key = self._gen_cache_token(key, variable)
+        return f'{self.cache_dir}/{token_key}.{self._format}'
     
     def _gen_cache_id_file_name(self, key, variable):
         """generate a unique cache file name"""
-        token = dask.base.tokenize(self.origins_dict, key, variable)
-        return f'{cache_catalog_dir}/{cache_catalog_prefix}-{token}.yml'
+        token_key = self._gen_cache_token(key, variable)
+        return f'{cache_catalog_dir}/{cache_catalog_prefix}-{token_key}.yml'
         
     def _find_cache_id_files(self):
         return sorted(glob(f'{cache_catalog_dir}/{cache_catalog_prefix}-*.yml'))        
 
     def __repr__(self):
-        return pprint.pformat(self.origins_dict, indent=2, width=1)
+        return pprint.pformat(self.origins_dict, indent=2, width=1, compact=True)
         
 class derived_var(object):
     """
@@ -410,20 +442,99 @@ def register_query_dependent_op(func, query_keys):
     return func
 
 
-def _intake_esm_get_keys_info(cat):
+def intake_esm_get_keys_info(cat):
     """return a dictionary with the values of components of the keys in an
        intake catalog
-    """
-    groupby_attrs_values = {
-        k: cat.unique(columns=k)[k]['values'] 
-        for k in cat.groupby_attrs
-    }        
-    key_info = {k: {} for k in cat.keys()}
-    for key in cat.keys():
-        for attr in cat.groupby_attrs:
-            values = groupby_attrs_values[attr]
-            match = [v for v in values if v in key]
-            assert len(match) == 1, 'expecting a unique match'
-            key_info[key][attr] = match[0]
+       
+       Example:
+         key_info = {
+           'experiment': '20C',
+           'component': 'ocn',
+           'stream': 'pop.h',
+           'member_id': 1,
+         }
+    """    
+    
+    # generate a list of lists with all possible values of each groupby_attr
+    iterables = [
+        cat.unique(columns=key)[key]['values'] 
+        for key in cat.groupby_attrs
+    ]    
+
+    # generate a dictionary of keys with the values of its attributes
+    key_info = {}    
+    for values in product(*iterables):
+        key = cat.sep.join([str(v) for v in values])
+        if key in cat.keys():
+            key_info[key] = {k: values[i] for i, k in enumerate(cat.groupby_attrs)}
     return key_info
 
+
+def to_intake_esm():
+    """generate an intake-esm data catalog from funnel collections"""
+    
+    catalog_csv_file = f'{cache_catalog_dir}/collection-summary.csv.gz'
+    catalog_json_file = f'{cache_catalog_dir}/collection-summary.json'
+    
+    files = sorted(glob(f'{cache_catalog_dir}/*.yml'))
+    data = {}
+    for f in files:
+        with open(f) as fid:
+            data[f] = yaml.unsafe_load(fid)
+
+    # assume that there is a *single* esm_collection
+    # this could be extended, but supporting multiple collections
+    # raises all sorts of questions about validation
+    esm_collection = [v['esm_collection'] for v in data.values()]
+    assert len(set(esm_collection)) == 1
+    catalog = intake.open_esm_datastore(esm_collection[0])
+    
+    # generate a dictionary of the key info dictionaries for each catalog
+    groupby_attrs_values = intake_esm_get_keys_info(catalog)
+    first_key = list(groupby_attrs_values.keys())[0]
+    columns = list(groupby_attrs_values[first_key].keys()) + ['variable', 'name', 'path']
+    
+    lines = []    
+    for f in files:        
+        column_data = dict(**groupby_attrs_values[data[f]['key']])
+        column_data['variable'] = data[f]['variable']
+        column_data['name'] = data[f]['name']
+        column_data['path'] = data[f]['asset']
+        lines.append(column_data)
+    
+    df = pd.DataFrame(lines)        
+    assert set(df.columns) == set(columns), 'mismatch in expected columns'
+        
+    # modify the json
+    with open(esm_collection[0]) as fid:
+        catalog_def = json.load(fid)
+
+    catalog_def['catalog_file'] = catalog_csv_file
+    catalog_def['attributes'] = [{'column_name': k, 'vocabulary': ''} for k in columns]
+    catalog_def['assets'] = {'column_name': 'path', 'format': cache_format}
+
+    # ensure that all `groupby_attrs` are in the columns of the DataFrame
+    assert all(
+        [c in columns for c in catalog_def['aggregation_control']['groupby_attrs']]
+    ), 'not all groupby attrs found in columns'
+    
+    # add `name` to `groupby_attrs`
+    catalog_def['aggregation_control']['groupby_attrs'] += ['name']
+    
+    # filter the aggregations rules to ensure only existing columns are included
+    catalog_def['aggregation_control']['aggregations'] = [
+        d for d in catalog_def['aggregation_control']['aggregations']
+        if d['attribute_name'] in columns
+    ]    
+    
+    # persist
+    df.to_csv(catalog_csv_file, index=False)
+    
+    with open(catalog_json_file, 'w') as fid:
+        json.dump(catalog_def, fid)
+        
+    return catalog_json_file
+    
+    
+
+    
