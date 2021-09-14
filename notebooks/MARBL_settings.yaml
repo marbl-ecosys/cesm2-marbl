@@ -118,6 +118,7 @@ Parameters :
     autotroph_settings(1)%mort2_per_day :
         label : $a_i$
         description_suffix : for all phytoplankton
+        units: (1/day)/(mmol/m^3)$^{0.75}$
 #     autotroph_settings(2)%mort2_per_day :
 #         label : $a_\mathrm{diat}$
 #         description_suffix : for diatoms
@@ -197,6 +198,7 @@ Parameters :
         label : $m_Z$
     zooplankton_settings(1)%z_mort2_0_per_day :
         label : $a_Z$
+        units: (1/day)/(mmol/m^3)$^{0.5}$
 #     parm_scalelen_z :
 #         label : Remin length scale depths
 #     parm_scalelen_vals :
