@@ -24,8 +24,7 @@ notebooks:
       - transient-biological-pump
 
 esm_collection: data/campaign-cesm2-cmip6-timeseries.json
-#cache_dir: /glade/p/cgd/oce/projects/cesm2-marbl/funnel
-cache_dir: "/glade/scratch/{{env['USER']}}/cesm2-marbl-cache"
+cache_dir: /glade/p/cgd/oce/projects/cesm2-marbl/funnel-cache
 data_collections:
     epoch_mean:
         experiment:
