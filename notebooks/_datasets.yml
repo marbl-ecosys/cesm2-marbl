@@ -15,7 +15,9 @@ epoch_mean: # compute mean over 25 years, mostly monthly data
       - DOC
       - DOCr
       - DON
+      - DON_RIV_FLUX
       - DONr
+      - DONr_RIV_FLUX
       - DOP
       - DOPr  
       - diat_P_lim_Cweight_avg_100m
@@ -35,8 +37,12 @@ epoch_mean: # compute mean over 25 years, mostly monthly data
       - FG_CO2
       - IRON_FLUX
       - Jint_100m_DIC
+      - NHx_SURFACE_EMIS
+      - NHy_FLUX
       - NO3
+      - NO3_RIV_FLUX
       - PO4
+      - NOx_FLUX
       - POC_FLUX_100m
       - POP_FLUX_100m
       - pfeToSed
@@ -44,7 +50,9 @@ epoch_mean: # compute mean over 25 years, mostly monthly data
       - photoC_sp_zint_100m
       - photoC_diat_zint_100m
       - photoC_diaz_zint_100m
+      - ponToSed
       - SALT  
+      - SedDenitrif
       - SiO3
       - SiO2_FLUX_100m
       - sp_P_lim_Cweight_avg_100m
@@ -80,19 +88,19 @@ epoch_mean: # compute mean over 25 years, mostly monthly data
 global_mean_timeseries_ann: # compute global mean timeseries from monthly data
     historical:
       - ATM_CO2
-      - SST  
+      - TEMP  
     SSP1-2.6:
       - ATM_CO2
-      - SST  
+      - TEMP 
     SSP2-4.5:
       - ATM_CO2
-      - SST  
+      - TEMP 
     SSP3-7.0:
       - ATM_CO2
-      - SST  
+      - TEMP 
     SSP5-8.5:
       - ATM_CO2
-      - SST  
+      - TEMP 
 
 global_integral_timeseries_ann: # compute global mean timeseries from monthly data
     historical:
