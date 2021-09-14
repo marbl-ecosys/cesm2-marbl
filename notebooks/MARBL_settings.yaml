@@ -117,6 +117,7 @@ Parameters :
 #         description_suffix : for diazotrophs
     autotroph_settings(1)%mort2_per_day :
         label : $a_i$
+        description : "``Quadratic'' mortality rate"
         description_suffix : for all phytoplankton
         units: (1/day)/(mmol/m^3)$^{0.75}$
 #     autotroph_settings(2)%mort2_per_day :
