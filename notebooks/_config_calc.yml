@@ -1,6 +1,7 @@
 project_kernel: cesm2-marbl
 notebooks:
     pre_notebooks:
+      - generate-catalog
       - _data-Ncycle
       - _data-nutrient-plots
       - _data-mld-obs
@@ -23,7 +24,8 @@ notebooks:
       - transient-fgco2
       - transient-biological-pump
 
-esm_collection: data/campaign-cesm2-cmip6-timeseries.json
+esm_data_dir: /glade/scratch/mclong/cesm2-marbl-data_nc
+esm_collection: data/cesm2-cmip6-timeseries.json
 cache_dir: /glade/p/cgd/oce/projects/cesm2-marbl/funnel-cache
 data_collections:
     epoch_mean:
